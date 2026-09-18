@@ -34,6 +34,7 @@ const envelope = {
   observedAt: now,
   feedStatus: "live",
   plan: {
+    source: "local-desk",
     entry: "188.037500",
     stop: "186.912500",
     t1: "189.162500",
@@ -70,9 +71,32 @@ assert.equal(
   ),
   null,
 );
+const numericPlan = {
+  ...envelope,
+  plan: {
+    ...envelope.plan,
+    entry: 188.0375,
+    t1: 189.1625,
+    target1: 189.1625,
+  },
+};
+assert.equal(
+  globalThis.JarvisDeskPlan.validateEnvelope(numericPlan, 41, now),
+  numericPlan,
+);
+assert.equal(
+  globalThis.JarvisDeskPlan.levelValue(
+    { target1: 189.1625 },
+    "t1",
+  ),
+  189.1625,
+);
 assert.equal(
   globalThis.JarvisDeskPlan.validateEnvelope(
-    { ...envelope, plan: { ...envelope.plan, entry: 188.0375 } },
+    {
+      ...numericPlan,
+      plan: { ...numericPlan.plan, target1: 999 },
+    },
     41,
     now,
   ),
@@ -95,6 +119,24 @@ const withoutT2 = {
 assert.equal(
   globalThis.JarvisDeskPlan.validateEnvelope(withoutT2, 41, now),
   withoutT2,
+);
+
+const delayed = {
+  ...envelope,
+  feedStatus: "delayed",
+  delayMinutes: 15,
+};
+assert.equal(
+  globalThis.JarvisDeskPlan.validateEnvelope(delayed, 41, now),
+  delayed,
+);
+assert.equal(
+  globalThis.JarvisDeskPlan.validateEnvelope(
+    { ...delayed, delayMinutes: undefined },
+    41,
+    now,
+  ),
+  null,
 );
 
 const content = fs.readFileSync("content.js", "utf8");

@@ -14,15 +14,27 @@ window.postMessage({
   observedAt: Date.now(),
   feedStatus: "live",
   plan: {
-    entry: "188.0375",
-    stop: "186.9125",
-    t1: "189.1625",
-    t2: "190.2875",
+    id: "AAPL-LocalDesk",
+    symbol: "AAPL",
+    source: "local-desk",
+    side: "BUY",
+    entry: 188.0375,
+    stop: 186.9125,
+    t1: 189.1625,
+    t2: 190.2875,
+    target1: 189.1625,
+    target2: 190.2875,
+    rMultiple: 1,
+    rewardRisk: 1,
     invalidation: "Leave if price closes below the plan stop.",
     quality: "Okay",
-    bias: "Price is holding above the local trend.",
-    rewardRisk: "1:1",
-    setupName: "Optional setup name"
+    levelsUsed: ["VWAP", "OR", "ATR"],
+    why: {
+      bias: "Price is holding above session VWAP.",
+      invalidation: "Leave if price closes below the plan stop.",
+      r: 1,
+      setupName: "LocalDesk"
+    }
   },
   projection: {
     entry: 0.56,
@@ -40,10 +52,12 @@ window.postMessage({
 - Primary TAKE PROFIT reads only `plan.t1`; `plan.t2` is optional and secondary.
 - Why/invalidation reads only `plan.invalidation`.
 - Quality chrome accepts only `Strong`, `Okay`, or `Skip`.
-- Prices are positive decimal **strings** so trailing precision survives JSON transport unchanged.
+- Prices use the canonical numeric values from LocalDesk. The HUD calls no rounding or formatting helper; it renders JavaScript’s direct string form of the received number. Decimal strings are also accepted for transports that preserve lexical precision.
+- `target1` is an alias of `t1`, `target2` is an alias of `t2`, and mismatched alias pairs reject the whole envelope.
+- `source` must be `local-desk`; `levelsUsed` may include `VWAP`, `OR`, `PRIOR_H`, `PRIOR_L`, and `ATR`.
 - `projection` is an atomic, normalized top-to-bottom chart coordinate produced from the same host-scale revision as the plan. It controls placement only; it never supplies display prices.
 
-Optional `bias`, `rewardRisk`, and `setupName` values appear only inside the collapsed **Why** expander.
+`why.invalidation`, `why.bias`, `why.r` (T1 only), and optional `why.setupName` appear only inside the collapsed **Why** expander.
 
 ## Freshness and gap behavior
 
@@ -54,4 +68,10 @@ Optional `bias`, `rewardRisk`, and `setupName` values appear only inside the col
 - When the stream is absent or stale, the HUD clears every chart label and tracer, switches to the Universal dock, and shows `MOCK · demo prices`. `Delayed` is reserved for a real provider that explicitly reports a delayed feed.
 - `Skip` remains visible as quality chrome. This extension exposes no executable order action.
 
-The message example documents shape only. The extension does not emit synthetic envelopes or use those example values at runtime.
+The message example documents the live envelope shape. The extension does not emit synthetic live envelopes.
+
+## Mock fixture and axis-snap status
+
+Until PR #4’s LocalDesk producer is available to the extension runtime, `content.js` carries one schema-matching DeskPlan fixture for layout review. Its feed badge is always `MOCK · demo prices`; it is never called Live or Delayed. The fixture projection is visual-only and is not a Design PASS for exact host-axis placement.
+
+The integration step is to send LocalDesk’s unmodified `entry`, `stop`, `t1`, and optional `t2` together with host-axis projections from the same chart-scale revision. The HUD already snaps each line, beacon center, arrow row, and mono number to those projection coordinates without price re-rounding. Missing prices or projections reject the live envelope and preserve honest mock chrome.

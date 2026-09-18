@@ -13,24 +13,33 @@ A dependency-free Chrome Manifest V3 extension that renders a canonical live `De
 
 Chrome warns that the extension can read page content because the required Universal adapter uses `<all_urls>`. The extension only looks for public chart mount elements and injects its own shadow-DOM UI; it does not scrape authentication or account data.
 
+### COO preview path
+
+1. After **Load unpacked**, open a public `https://www.tradingview.com/chart/` chart and reload once.
+2. Expect one right-edge Jarvis dock plus arrowed **BUY ZONE**, **TAKE PROFIT**, and **GET OUT** labels with mono prices.
+3. Confirm **Practice money (Paper)** and **MOCK · demo prices** are both visible. This is the fixture path, not live Algos output.
+4. Open **Why** to see quality, invalidation, bias, and reward:risk; close it to restore Beginner view.
+5. Press backtick to hide/restore Jarvis, then drag the chart through a label to confirm the chart still receives pointer input.
+6. Open an ordinary page with no recognized chart mount to verify the **Universal dock** appears without chart ESP.
+
 ## HostAdapter registry
 
 `adapters.js` is the v1 registry. Host-specific configuration is limited to chart mount selectors, label contrast tokens, and the host badge.
 
 | Adapter | Matched pages | Behavior |
 |---|---|---|
-| TradingView | `tradingview.com` and subdomains | Exact plan waypoints when both a known chart mount and fresh live DeskPlan projection exist |
-| Webull | `webull.com` and subdomains | Shared exact plan HUD, positioned against the detected chart to avoid the order area |
-| Yahoo Finance | `finance.yahoo.com` | Shared exact plan HUD with a stronger label outline for light pages |
+| TradingView | `tradingview.com` and subdomains | Shared DeskPlan waypoints; MOCK fixture until the live LocalDesk envelope is wired |
+| Webull | `webull.com` and subdomains | Shared DeskPlan HUD, positioned against the detected chart to avoid the order area |
+| Yahoo Finance | `finance.yahoo.com` | Shared DeskPlan HUD with a stronger label outline for light pages |
 | Universal | Any other `http` or `https` page, a missing chart mount, or an unavailable/stale stream | Edge dock only; never draws fake ESP or invented levels |
 
-The Universal adapter is intentionally the fallback until both the host chart and fresh plan projection are valid.
+The Universal adapter is intentionally the fallback when a host chart mount is unknown. It never draws ESP against an unknown DOM region.
 
 ## DeskPlan stream contract
 
-Risk/Algos owns `plan.entry`, `plan.stop`, `plan.t1`, optional `plan.t2`, `plan.invalidation`, and `plan.quality`. The HUD accepts exact decimal strings over the free local stream and renders them unchanged. Platform supplies matching normalized chart projections in the same atomic message. See [`docs/DESKPLAN.md`](docs/DESKPLAN.md).
+Risk/Algos owns `plan.entry`, `plan.stop`, `plan.t1`, optional `plan.t2`, aliases `target1`/`target2`, `plan.why`, and `plan.quality`. The HUD accepts PR #4’s LocalDesk numeric schema and renders values without `toFixed`, pretty-rounding, or client recomputation. Platform supplies matching normalized chart projections in the same atomic message. See [`docs/DESKPLAN.md`](docs/DESKPLAN.md).
 
-There is no LLM-per-tick path or timer batching. Missing, malformed, out-of-order, or older-than-three-seconds messages clear chart ESP and return to the honest `MOCK · demo prices` gap state. `Delayed` is used only when a real quote provider explicitly reports a delayed feed.
+There is no LLM-per-tick path or timer batching. Until the stream bridge lands, the schema-matching fixture is always labeled `MOCK · demo prices`. `Delayed` is used only when a real quote provider explicitly reports a delayed feed.
 
 ## Controls and safety
 
@@ -56,10 +65,10 @@ There is no LLM-per-tick path or timer batching. Missing, malformed, out-of-orde
 - `docs/DESKPLAN.md` — canonical Risk/Algos-to-HUD rendering contract
 - `docs/DEMO.md` — multi-host screenshot and interaction checklist
 
-Run `node tests/validate.mjs` for manifest order, host routing, exact string preservation, gap-safety, freshness, sequence, and quality validation.
+Run `node tests/validate.mjs` for manifest order, host routing, canonical values/aliases, gap-safety, freshness, sequence, and quality validation.
 
 ## Current spike limits
 
-- This repository contains the HUD consumer, not the Algos/Platform stream producer. With no valid producer message, it deliberately remains in the gap state and draws no chart levels.
+- This repository contains the HUD consumer and a schema-matching mock fixture, not the Algos/Platform stream producer. Mock projections are for layout review and are not claimed as a Design PASS for exact host-axis placement.
 - DOM selectors can change when host sites ship updates. A failed mount safely degrades to the Universal edge dock.
 - This spike has no trade execution, authentication, background service worker, or external network requests.

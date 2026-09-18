@@ -46,12 +46,46 @@
     },
   ];
   const MOCK_DESK_PLAN = Object.freeze({
-    entry: "188.037500",
-    stop: "186.912500",
-    t1: "189.162500",
-    t2: "190.287500",
+    id: "DEMO-LocalDesk",
+    symbol: "DEMO",
+    source: "local-desk",
+    side: "BUY",
+    entry: 188.0375,
+    stop: 186.9125,
+    t1: 189.1625,
+    t2: 190.2875,
+    target1: 189.1625,
+    target2: 190.2875,
+    rMultiple: 1,
+    rewardRisk: 1,
     invalidation: "Mock only — no live signal is connected.",
     quality: "Okay",
+    levelsUsed: ["VWAP", "OR", "ATR"],
+    surface: {
+      buyZone: { label: "BUY ZONE", price: 188.0375, subtitle: "Buy here" },
+      takeProfit: {
+        label: "TAKE PROFIT",
+        price: 189.1625,
+        subtitle: "Take some money off",
+      },
+      getOut: {
+        label: "GET OUT",
+        price: 186.9125,
+        subtitle: "Leave if price hits here",
+      },
+    },
+    why: {
+      bias: "Mock LocalDesk fixture for layout review only.",
+      invalidation: "Mock only — no live signal is connected.",
+      r: 1,
+      setupName: "LocalDesk fixture",
+    },
+  });
+  const MOCK_PROJECTION = Object.freeze({
+    entry: 0.56,
+    stop: 0.73,
+    t1: 0.39,
+    t2: 0.24,
   });
 
   const defaultPreferences = {
@@ -95,17 +129,21 @@
 
   function levelsForPlan(plan, projection) {
     return LEVEL_CONFIG.filter(
-      (level) => plan[level.field] !== undefined,
+      (level) =>
+        globalThis.JarvisDeskPlan.levelValue(plan, level.field) !== undefined,
     ).map((level) => ({
       ...level,
-      price: plan[level.field],
+      price: String(
+        globalThis.JarvisDeskPlan.levelValue(plan, level.field),
+      ),
       ratio: projection?.[level.field],
     }));
   }
 
   function currentLevels() {
-    if (!activeEnvelope) return [];
-    return levelsForPlan(activeEnvelope.plan, activeEnvelope.projection);
+    return activeEnvelope
+      ? levelsForPlan(activeEnvelope.plan, activeEnvelope.projection)
+      : levelsForPlan(MOCK_DESK_PLAN, MOCK_PROJECTION);
   }
 
   function setGapState(reason = "Waiting for an exact live DeskPlan") {
@@ -662,7 +700,7 @@
             </div>
             <div class="badge mode">
               <span>Analysis mode</span>
-              <strong class="analysis-value">Local analysis unavailable · MOCK plan</strong>
+              <strong class="analysis-value">Live analysis on this chart (free)</strong>
             </div>
           </div>
 
@@ -758,10 +796,10 @@
     const renderWhy = (plan) => {
       const whyFields = [
         ["Quality", plan.quality],
-        ["Invalidation", plan.invalidation],
-        ["Bias", plan.bias],
-        ["Reward:risk", plan.rewardRisk],
-        ["Setup", plan.setupName],
+        ["Invalidation", plan.why?.invalidation ?? plan.invalidation],
+        ["Bias", plan.why?.bias ?? plan.bias],
+        ["Reward:risk", plan.why?.r ?? plan.rMultiple ?? plan.rewardRisk],
+        ["Setup", plan.why?.setupName ?? plan.setupName],
       ];
       for (const [label, value] of whyFields) {
         if (!value) continue;
@@ -773,38 +811,7 @@
       }
     };
 
-    if (!activeEnvelope) {
-      const gap = document.createElement("div");
-      gap.className = "gap-state gap-copy";
-      gap.textContent = "MOCK plan · waiting for an exact live DeskPlan";
-      list.appendChild(gap);
-      for (const level of levelsForPlan(MOCK_DESK_PLAN)) appendListRow(level);
-      feedValue.textContent = "MOCK · demo prices";
-      analysisValue.textContent = "Local analysis unavailable · MOCK plan";
-      planState.textContent = `MOCK · Quality: ${MOCK_DESK_PLAN.quality}`;
-      delayedWarning.textContent =
-        "Mock dock only — chart ESP is off until an exact live stream arrives.";
-      delayedWarning.classList.remove("is-hidden");
-      whyPanel.classList.toggle("is-hidden", !preferences.risk);
-      whyPanel.open = whyWasOpen;
-      renderWhy(MOCK_DESK_PLAN);
-      return;
-    }
-
-    const levels = currentLevels();
-    const lag = Math.max(0, Date.now() - activeEnvelope.observedAt);
-    feedValue.textContent = `Prices: Live · ${lag}ms`;
-    analysisValue.textContent = "Live analysis on this chart (free)";
-    planState.textContent = `Quality: ${activeEnvelope.plan.quality}`;
-    delayedWarning.classList.add("is-hidden");
-    whyPanel.classList.toggle("is-hidden", !preferences.risk);
-    whyPanel.open = whyWasOpen;
-
-    renderWhy(activeEnvelope.plan);
-
-    for (const level of levels) {
-      appendListRow(level);
-
+    const appendWaypoint = (level) => {
       const waypoint = document.createElement("div");
       waypoint.className = `waypoint ${level.id}`;
       waypoint.dataset.level = level.id;
@@ -826,11 +833,62 @@
       waypoint.append(beacon, label);
       container.appendChild(waypoint);
 
-      const tracer = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      const tracer = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line",
+      );
       tracer.classList.add("tracer");
       tracer.dataset.level = level.id;
       tracer.setAttribute("stroke", level.color);
       tracers.appendChild(tracer);
+    };
+
+    if (!activeEnvelope) {
+      const gap = document.createElement("div");
+      gap.className = "gap-state gap-copy";
+      gap.textContent = "MOCK plan · waiting for an exact live DeskPlan";
+      list.appendChild(gap);
+      for (const level of currentLevels()) {
+        appendListRow(level);
+        appendWaypoint(level);
+      }
+      feedValue.textContent = "MOCK · demo prices";
+      analysisValue.textContent = "Live analysis on this chart (free)";
+      planState.textContent = `MOCK · Quality: ${MOCK_DESK_PLAN.quality}`;
+      delayedWarning.textContent =
+        "Mock dock only — chart ESP is off until an exact live stream arrives.";
+      delayedWarning.classList.remove("is-hidden");
+      whyPanel.classList.toggle("is-hidden", !preferences.risk);
+      whyPanel.open = whyWasOpen;
+      renderWhy(MOCK_DESK_PLAN);
+      return;
+    }
+
+    const levels = currentLevels();
+    const lag = Math.max(0, Date.now() - activeEnvelope.observedAt);
+    const feedStatus = String(
+      activeEnvelope.quote?.feed ?? activeEnvelope.feedStatus,
+    ).toLowerCase();
+    feedValue.textContent =
+      feedStatus === "delayed"
+        ? `Prices: Delayed · ~${activeEnvelope.delayMinutes}m`
+        : `Prices: Live · ${lag}ms`;
+    analysisValue.textContent = "Live analysis on this chart (free)";
+    planState.textContent = `Quality: ${activeEnvelope.plan.quality}`;
+    delayedWarning.textContent =
+      "Provider reports delayed prices — do not use for live day trades.";
+    delayedWarning.classList.toggle(
+      "is-hidden",
+      feedStatus !== "delayed",
+    );
+    whyPanel.classList.toggle("is-hidden", !preferences.risk);
+    whyPanel.open = whyWasOpen;
+
+    renderWhy(activeEnvelope.plan);
+
+    for (const level of levels) {
+      appendListRow(level);
+      appendWaypoint(level);
     }
   }
 
@@ -960,8 +1018,8 @@
 
     const requestedAdapter =
       globalThis.JarvisHostAdapters.adapterForLocation(location);
-    chartBounds = activeEnvelope ? findChartBounds(requestedAdapter) : null;
-    const resolvedAdapter = chartBounds && activeEnvelope
+    chartBounds = findChartBounds(requestedAdapter);
+    const resolvedAdapter = chartBounds
       ? requestedAdapter
       : globalThis.JarvisHostAdapters.universal;
     if (resolvedAdapter !== activeAdapter) applyHostAdapter(resolvedAdapter);
