@@ -169,7 +169,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
                     <Zap className="size-4" /> Apply Jarvis plan
                   </Button>
                 ) : (
-                  <Button variant="primary" size="lg" className="mt-3 w-full" disabled={plan.quality === "Skip"} onClick={() => void placeOrder()}>
+                  <Button variant="primary" size="lg" className="mt-3 w-full" disabled={displayPlan.quality === "Skip"} onClick={() => void placeOrder()}>
                     <Shield className="size-4" /> Place {preferences.brokerMode === "live" ? "LIVE" : "PAPER"} order
                   </Button>
                 )}
