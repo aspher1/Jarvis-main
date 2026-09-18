@@ -132,7 +132,7 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
   const dailyLocked = metrics.totalPnl <= -(preferences.equity * preferences.dailyLossPercent) / 100
   const paperProofCount = closed.filter((fill) => fill.hasStop && fill.mode === "paper").length
 
-  const submitOrder: JarvisState["submitOrder"] = async (order, feedIsLive) => {
+  const submitOrder: JarvisState["submitOrder"] = async (order, feedIsLive, planQuality) => {
     const risk = checkRisk(order, {
       equity: preferences.equity,
       maxRiskPercent: preferences.maxRiskPercent,
