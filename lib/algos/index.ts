@@ -106,9 +106,9 @@ export function trendFollow(symbol: string, candles: Candle[]): Signal[] {
   const slow = average(closes.slice(-30))
   const last = closes.at(-1)!
   const desk = analyzeDesk(candles)
-  const entry = Math.max(last, desk.vwap)
-  const structuralStop = Math.max(desk.openingRangeLow, desk.vwap * 0.995)
-  const stop = Math.min(entry * 0.995, structuralStop)
+  const entry = last
+  const recentLow = Math.min(...candles.slice(-8).map((candle) => candle.low))
+  const stop = Math.min(entry * 0.995, Math.max(entry * 0.99, recentLow))
   return [signal(symbol, "TrendFollow", entry, stop, fast > slow ? 82 : 58, fast > slow && desk.bias === "Bullish" ? "low" : "medium", `Price is ${last >= desk.vwap ? "above" : "below"} VWAP ${desk.vwap.toFixed(2)} and the short trend is ${fast > slow ? "leading" : "mixed"}.`, desk)]
 }
 

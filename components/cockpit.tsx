@@ -64,7 +64,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
   async function askJarvis(signalPool = signals) {
     setBusy(true)
     try {
-      const next = await assistant.propose({ symbol, equity: preferences.equity, riskPercent: preferences.riskPercent, feed: quote?.feed ?? "mock", signals: signalPool })
+      const next = await assistant.propose({ symbol, equity: preferences.equity, riskPercent: preferences.riskPercent, currentPrice: quote?.price ?? signalPool[0]?.entry ?? 0, feed: quote?.feed ?? "mock", signals: signalPool })
       setPendingPlan(next)
       setNotice(`${next.quality} plan found. Check the four numbers, then apply it to the chart.`)
     } catch (caught) {
