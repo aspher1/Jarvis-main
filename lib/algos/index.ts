@@ -1,23 +1,13 @@
 import type { Candle } from "@/lib/market"
+import { planLayers, type PlanContract, type PlanQuality } from "@/lib/plans/types"
 
 export type AlgoName = "TrendFollow" | "MeanRevert" | "Breakout"
-export type PlanQuality = "Strong" | "Okay" | "Skip"
+export type { PlanQuality } from "@/lib/plans/types"
 
-export type Signal = {
-  id: string
-  symbol: string
+export type Signal = PlanContract & {
   algo: AlgoName
-  side: "BUY" | "SELL"
-  entry: number
-  stop: number
-  target1: number
-  target2: number
   confidence: number
-  rewardRisk: number
-  quality: PlanQuality
-  plainEnglish: string
   reason: string
-  invalidation: string
   congestion: "low" | "medium" | "high"
 }
 
@@ -34,26 +24,39 @@ function signal(symbol: string, algo: AlgoName, entry: number, stop: number, con
   const risk = Math.abs(entry - stop)
   const target1 = entry + risk * 2
   const target2 = entry + risk * 3
-  const rewardRisk = round((target1 - entry) / risk)
-  const quality = scorePlan(rewardRisk, (risk / entry) * 100, congestion)
-  return {
-    id: `${symbol}-${algo}`,
-    symbol,
-    algo,
-    side: "BUY",
+  const prices = {
     entry: round(entry),
     stop: round(stop),
     target1: round(target1),
     target2: round(target2),
+  }
+  const orderRisk = Math.abs(prices.entry - prices.stop)
+  const rewardRisk = round(Math.abs(prices.target1 - prices.entry) / orderRisk)
+  const quality = scorePlan(rewardRisk, (orderRisk / prices.entry) * 100, congestion)
+  const invalidation = `Out if a 5-minute candle closes below ${prices.stop}.`
+  return {
+    id: `${symbol}-${algo}`,
+    symbol,
+    algo,
+    source: "algo",
+    side: "BUY",
+    entry: prices.entry,
+    stop: prices.stop,
+    t1: prices.target1,
+    t2: prices.target2,
+    rMultiple: rewardRisk,
+    target1: prices.target1,
+    target2: prices.target2,
     confidence,
     rewardRisk,
     quality,
     plainEnglish:
       quality === "Skip"
         ? "Skip this setup — price is crowded or the reward is too small."
-        : `Buy near ${round(entry)} only if price holds. Get out at ${round(stop)} if wrong.`,
+        : `Check BUY ZONE at ${prices.entry}. TAKE PROFIT at ${prices.target1}. Set GET OUT at ${prices.stop}.`,
     reason,
-    invalidation: `Out if a 5-minute candle closes below ${round(stop)}.`,
+    invalidation,
+    ...planLayers(prices.entry, prices.stop, prices.target1, reason, invalidation, rewardRisk, algo),
     congestion,
   }
 }

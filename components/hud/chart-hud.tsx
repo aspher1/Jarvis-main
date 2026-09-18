@@ -60,10 +60,10 @@ export function ChartHud({ candles, quote, plan, modules }: {
   }, [candles])
 
   const levels = useMemo(() => plan && candles.length ? [
-    { key: "target2", label: "T2 · TAKE MORE PROFIT", value: plan.target2, color: "#a6ff4d" },
-    { key: "target1", label: "T1 · TAKE SOME PROFIT", value: plan.target1, color: "#00d4aa" },
-    { key: "entry", label: "ENTRY · BUY HERE", value: plan.entry, color: "#00d4aa" },
-    { key: "stop", label: "STOP · GET OUT IF WRONG", value: plan.stop, color: "#ff4757" },
+    { key: "target2", label: plan.surface.takeProfit.label, value: plan.t2, color: "#a6ff4d" },
+    { key: "target1", label: plan.surface.takeProfit.label, value: plan.surface.takeProfit.price, color: "#00d4aa" },
+    { key: "entry", label: plan.surface.buyZone.label, value: plan.surface.buyZone.price, color: "#00d4aa" },
+    { key: "stop", label: plan.surface.getOut.label, value: plan.surface.getOut.price, color: "#ff4757" },
   ].map((level) => ({ ...level, top: levelPosition(level.value, candles) })) : [], [candles, plan])
 
   return (
@@ -79,7 +79,7 @@ export function ChartHud({ candles, quote, plan, modules }: {
       {plan && modules.esp ? (
         <div className="pointer-events-none absolute inset-0 z-20">
           <svg className="absolute inset-0 size-full" preserveAspectRatio="none" aria-hidden="true">
-            <line x1="68%" y1={`${levelPosition(quote?.price ?? plan.entry, candles)}%`} x2="91%" y2={`${levelPosition(plan.target1, candles)}%`} stroke="#00d4aa" strokeWidth="1" strokeDasharray="5 5" opacity=".6" />
+            <line x1="68%" y1={`${levelPosition(quote?.price ?? plan.entry, candles)}%`} x2="91%" y2={`${levelPosition(plan.surface.takeProfit.price, candles)}%`} stroke="#00d4aa" strokeWidth="1" strokeDasharray="5 5" opacity=".6" />
           </svg>
           <div
             className="absolute left-[23%] right-[9%] border border-[#00d4aa] bg-[#00d4aa0d]"
@@ -88,21 +88,20 @@ export function ChartHud({ candles, quote, plan, modules }: {
               height: `${Math.max(14, Math.abs(plan.entry - plan.stop) * 12)}px`,
             }}
           >
-            <span className="absolute -left-px -top-6 border border-[#00d4aa] bg-[#08221d] px-2 py-1 font-mono text-[10px] font-bold text-[#00d4aa]">ESP BOX · ENTRY ZONE</span>
+            <span className="absolute -left-px -top-6 border border-[#00d4aa] bg-[#08221d] px-2 py-1 font-mono text-[10px] font-bold text-[#00d4aa]">▶ {plan.surface.buyZone.label}</span>
           </div>
           {levels.map((level) => (
             <div key={level.key} className="absolute left-[15%] right-[3%] border-t" style={{ top: `${level.top}%`, borderColor: level.color }}>
               <div className="absolute -right-px -top-[14px] flex h-7 items-center gap-3 border px-2 font-mono text-[10px] font-bold" style={{ color: level.color, borderColor: level.color, background: "#0d0f0f" }}>
-                <span>{level.label}</span>
+                <span>▶ {level.label}</span>
                 <span>{number(level.value)}</span>
               </div>
-              <span className="absolute left-0 top-1 font-mono text-[9px]" style={{ color: level.color }}>WAYPOINT // {level.key.toUpperCase()}</span>
+              <span className="absolute left-0 top-1 font-mono text-[9px]" style={{ color: level.color }}>WAYPOINT</span>
             </div>
           ))}
           <div className="absolute left-[4%] top-[14%] border-l-2 border-[#ffb800] bg-[#17150d] px-3 py-2">
-            <span className="micro block !text-[#ffb800]">Lock target</span>
-            <span className="mono mt-1 block text-lg text-white">{number(plan.target1)}</span>
-            <span className="text-[10px] text-[#aaa]">{plan.rewardRisk.toFixed(1)}R reward / risk</span>
+            <span className="micro block !text-[#ffb800]">Next TAKE PROFIT</span>
+            <span className="mono mt-1 block text-lg text-white">{number(plan.surface.takeProfit.price)}</span>
           </div>
         </div>
       ) : (

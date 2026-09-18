@@ -12,7 +12,7 @@ export function CoachOverlay({ context }: { context: "home" | "trade" }) {
 
   const steps = context === "home"
     ? ["Pick a stock", "Turn on helpful modules", "Jarvis drops chart waypoints", "You confirm the order"]
-    : ["Turn on modules", "Ask Jarvis for a plan", "Check Entry · Stop · Target · Shares", "Place a Paper order"]
+    : ["Turn on modules", "Ask Jarvis for a plan", "Check BUY ZONE · TAKE PROFIT · GET OUT", "Place a Paper order"]
 
   return (
     <aside className="fixed bottom-8 left-4 z-40 w-[370px] border border-[#00d4aa] bg-[#101412] p-4 shadow-none" aria-label="First-run guide">
