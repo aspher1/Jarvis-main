@@ -9,6 +9,8 @@
       short: "T2",
       name: "Target 2",
       plain: "Take the rest of the profit",
+      hudLabel: "TAKE PROFIT",
+      hudArrow: "↑",
       price: "$192.80",
       ratio: 0.24,
       distance: "+2.0R",
@@ -19,6 +21,8 @@
       short: "T1",
       name: "Target 1",
       plain: "Take some profit",
+      hudLabel: "TAKE PROFIT",
+      hudArrow: "↑",
       price: "$190.40",
       ratio: 0.39,
       distance: "+1.0R",
@@ -29,6 +33,8 @@
       short: "ENTRY",
       name: "Entry",
       plain: "Buy here",
+      hudLabel: "BUY ZONE",
+      hudArrow: "→",
       price: "$188.00",
       ratio: 0.56,
       distance: "0R",
@@ -39,6 +45,8 @@
       short: "STOP",
       name: "Stop loss",
       plain: "Get out if wrong",
+      hudLabel: "GET OUT",
+      hudArrow: "↓",
       price: "$185.60",
       ratio: 0.73,
       distance: "−1.0R",
@@ -385,6 +393,11 @@
 
       .badge.paper strong { color: var(--jarvis-entry); }
       .badge.delayed strong { color: var(--jarvis-warning); }
+      .badge.mode {
+        grid-column: 1 / -1;
+        min-height: 27px;
+      }
+      .badge.mode strong { color: var(--jarvis-active); }
 
       .section-label {
         display: flex;
@@ -597,6 +610,10 @@
               <span>Price feed</span>
               <strong>Delayed · ~15m</strong>
             </div>
+            <div class="badge mode">
+              <span>Analysis mode</span>
+              <strong>FREE local analysis</strong>
+            </div>
           </div>
 
           <div class="section-label">
@@ -691,12 +708,12 @@
       const label = document.createElement("span");
       label.className = "waypoint-label";
       const name = document.createElement("strong");
-      name.textContent = level.short;
+      name.textContent = `${level.hudArrow} ${level.hudLabel}`;
       const price = document.createElement("span");
       price.className = "price";
       price.textContent = `${level.price} · ${level.distance}`;
       const plain = document.createElement("small");
-      plain.textContent = level.plain;
+      plain.textContent = `${level.short} · ${level.plain}`;
       label.append(name, price, plain);
       waypoint.append(beacon, label);
       container.appendChild(waypoint);

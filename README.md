@@ -35,6 +35,8 @@ The Universal adapter is intentionally the fallback even on a recognized host un
 - The full-screen graphics layer uses `pointer-events: none`. Only explicit dock controls accept pointer input, so host pan, zoom, crosshair, and drawing interactions remain available.
 - The dock can be collapsed and stays off the top/left host toolbars.
 - Paper mode and delayed-data warnings are always visible in the expanded dock.
+- **FREE local analysis** is the default mode; this spike has no cloud or paid-service dependency.
+- On-chart labels lead with kid-clear actions: **→ BUY ZONE**, **↑ TAKE PROFIT**, and **↓ GET OUT**. ENTRY, T1/T2, and STOP remain secondary context.
 
 ## Files
 

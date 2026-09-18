@@ -8,7 +8,7 @@ Use a desktop viewport at least 1280px wide. The mock plan should remain visibly
 
 - Open a public TradingView Superchart.
 - Confirm the badge reads **on TradingView**.
-- Capture the right-edge dock plus ENTRY, STOP, T1, and T2 chart labels.
+- Capture the right-edge dock plus → BUY ZONE, ↑ TAKE PROFIT, and ↓ GET OUT chart labels; ENTRY, T1/T2, and STOP should be secondary microtext.
 - Drag/pan the chart starting beneath a tracer or label to demonstrate that the graphics layer does not receive pointer events.
 - Click **Hide ESP**, then restore it. Press backtick to hide and restore all Jarvis UI.
 
@@ -24,7 +24,7 @@ Use a desktop viewport at least 1280px wide. The mock plan should remain visibly
 
 - Open any ordinary `http` or `https` page without a recognized chart mount.
 - Confirm the badge reads **Universal dock**.
-- Capture the edge dock with plan list, Paper badge, Delayed badge, modules, and disclaimer.
+- Capture the edge dock with plan list, Paper badge, Delayed badge, FREE local analysis chip, modules, and disclaimer.
 - Confirm there are no chart beacons, tracers, entry-zone rectangles, or other fake ESP.
 - Press backtick to hide and restore the dock without reloading.
 
