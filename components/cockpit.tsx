@@ -5,6 +5,7 @@ import { Bot, Check, ChevronDown, Copy, Crosshair, Radio, Send, Shield, Zap } fr
 import { ALGO_RUNNERS, type AlgoName, type Signal } from "@/lib/algos"
 import { LocalStructuredAssistant, type JarvisPlan } from "@/lib/assistant"
 import { COPY_LEADERS, leaderSignal } from "@/lib/copytrade"
+import { localDesk } from "@/lib/desk-plan"
 import { feedLabel } from "@/lib/market/types"
 import { useMarket } from "@/lib/market/use-market"
 import { positionSize } from "@/lib/paper"
@@ -38,17 +39,18 @@ export function Cockpit({ symbol }: { symbol: string }) {
     if (!candles.length || !modules.algo) return []
     return (Object.keys(algos) as AlgoName[]).flatMap((algo) => algos[algo] ? ALGO_RUNNERS[algo](symbol, candles) : [])
   }, [algos, candles, modules.algo, symbol])
+  const deskPlans = useMemo(() => candles.length && modules.algo ? localDesk(symbol, candles) : [], [candles, modules.algo, symbol])
 
   const plan = activePlan?.symbol === symbol ? activePlan : null
   const displayPlan = pendingPlan ?? plan
   const shares = displayPlan ? positionSize(preferences.equity, preferences.riskPercent, displayPlan.entry, displayPlan.stop) : 0
 
-  async function askJarvis(signalPool = signals) {
+  async function askJarvis(signalPool = [...deskPlans, ...signals]) {
     setBusy(true)
     try {
       const next = await assistant.propose({ symbol, equity: preferences.equity, riskPercent: preferences.riskPercent, feed: quote?.feed ?? "mock", signals: signalPool })
       setPendingPlan(next)
-      setNotice(`${next.quality} plan found. Check the four numbers, then apply it to the chart.`)
+      setNotice(`${next.quality} plan found. Check BUY ZONE, TAKE PROFIT, and GET OUT, then apply it to the chart.`)
     } catch (caught) {
       setNotice(caught instanceof Error ? caught.message : "Jarvis could not build a plan.")
     } finally {
@@ -148,9 +150,9 @@ export function Cockpit({ symbol }: { symbol: string }) {
                 <p className="mt-3 text-xs leading-5 text-white">{displayPlan.plainEnglish}</p>
                 <div className="mt-3 grid grid-cols-2 border-l border-t border-[#2a2a2a]">
                   {[
-                    ["Entry · Buy here", displayPlan.entry, "#00d4aa"],
-                    ["Stop · Get out", displayPlan.stop, "#ff4757"],
-                    ["Target · Take profit", displayPlan.target1, "#a6ff4d"],
+                    [displayPlan.surface.buyZone.label, displayPlan.surface.buyZone.price, "#00d4aa"],
+                    [displayPlan.surface.getOut.label, displayPlan.surface.getOut.price, "#ff4757"],
+                    [displayPlan.surface.takeProfit.label, displayPlan.surface.takeProfit.price, "#a6ff4d"],
                     ["Shares", shares, "#ffffff"],
                   ].map(([label, value, color]) => (
                     <div key={String(label)} className="border-b border-r border-[#2a2a2a] p-3">
@@ -194,7 +196,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
                 <div key={signal.id} className="border-b border-r border-[#2a2a2a] p-3">
                   <div className="flex justify-between"><strong className="font-mono text-[11px] text-white">{signal.algo}</strong><span className="text-[10px] font-bold text-[#00d4aa]">{signal.quality}</span></div>
                   <p className="mt-2 text-[11px] leading-4 text-[#aaa]">In plain English: {signal.plainEnglish}</p>
-                  <div className="mono mt-2 text-[10px] text-[#777]">BUY {number(signal.entry)} · STOP {number(signal.stop)} · {signal.rewardRisk}R</div>
+                  <div className="mono mt-2 text-[10px] text-[#777]">{signal.surface.buyZone.label} {number(signal.surface.buyZone.price)} · {signal.surface.takeProfit.label} {number(signal.surface.takeProfit.price)} · {signal.surface.getOut.label} {number(signal.surface.getOut.price)}</div>
                 </div>
               ))}
             </div>

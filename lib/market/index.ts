@@ -94,6 +94,11 @@ export function clientMarketData(): MarketData {
 
 export { mockCandles }
 export type { Candle, FeedKind, MarketData, Quote } from "./types"
+/*
+ * Legacy scaffold accidentally concatenated below the active market adapter.
+ * Keep it inert until it is removed in the market-data cleanup; the canonical
+ * numeric-timestamp contract above is the implementation used by the app.
+ *
 export type FeedStatus = "LIVE" | "DELAYED" | "MOCK"
 
 export type Candle = {
@@ -294,3 +299,4 @@ export function getMarketData(): MarketData {
   if (process.env.MARKET_DATA_MODE === "mock") return new MockMarketData()
   return new YahooMarketData()
 }
+*/

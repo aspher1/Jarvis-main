@@ -34,11 +34,13 @@ export const COPY_LEADERS: CopyLeader[] = [
 
 export function leaderSignal(leaderId: string, base: Signal): Signal {
   const leader = COPY_LEADERS.find((item) => item.id === leaderId) ?? COPY_LEADERS[0]
+  const reason = `${leader.note} ${base.reason}`
   return {
     ...base,
     id: `${base.id}-${leader.id}`,
     confidence: Math.max(52, base.confidence - (leader.id === "capitalguard" ? 0 : 4)),
     plainEnglish: `${leader.name} would follow this ${base.quality.toLowerCase()} setup. This is a simulated signal, not a copied real account.`,
-    reason: `${leader.note} ${base.reason}`,
+    reason,
+    why: { ...base.why, bias: reason },
   }
 }
