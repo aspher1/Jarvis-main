@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0d0d0d;
+  --panel: #141414;
+  --panel-raised: #181818;
+  --border: #2a2a2a;
+  --text: #ededed;
+  --muted: #858585;
+  --cyan: #00d4aa;
+  --coral: #ff4757;
+  --amber: #ffb800;
+  --lime: #a6ff4d;
+}
+
+* {
+  box-sizing: border-box;
+  border-radius: 0 !important;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--background);
+}
+
+body {
+  margin: 0;
+  min-width: 1180px;
+  background: var(--background);
+  color: var(--text);
+  font-family: Inter, "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.mono,
+[data-number] {
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.micro {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.panel-title {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 0 10px;
+}
+
+.hud-corners {
+  position: relative;
+}
+
+.hud-corners::before,
+.hud-corners::after {
+  position: absolute;
+  z-index: 5;
+  width: 16px;
+  height: 16px;
+  content: "";
+  pointer-events: none;
+}
+
+.hud-corners::before {
+  top: 5px;
+  left: 5px;
+  border-top: 1px solid var(--cyan);
+  border-left: 1px solid var(--cyan);
+}
+
+.hud-corners::after {
+  right: 5px;
+  bottom: 5px;
+  border-right: 1px solid var(--cyan);
+  border-bottom: 1px solid var(--cyan);
+}
+
+.scanline {
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.012) 4px);
+}
+
+::selection {
+  background: var(--cyan);
+  color: #001a14;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3b3b3b;
+}
+
+::-webkit-scrollbar-track {
+  background: #111;
+}
