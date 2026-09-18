@@ -2,7 +2,14 @@ import { scorePlan } from "@/lib/algos"
 import type { Candle } from "@/lib/market/types"
 import { planLayers, type PlanContract } from "@/lib/plans/types"
 
-export type LocalLevelName =
+export type DeskLevelName =
+  | "VWAP"
+  | "OR"
+  | "PRIOR_H"
+  | "PRIOR_L"
+  | "ATR"
+
+type LocalAnchorName =
   | "session-vwap"
   | "opening-range-5m-high"
   | "opening-range-5m-low"
@@ -10,13 +17,13 @@ export type LocalLevelName =
   | "opening-range-15m-low"
   | "prior-session-high"
   | "prior-session-low"
-  | "atr-14"
-  | "risk-projection"
 
 export type DeskPlan = PlanContract & {
   source: "local-desk"
   setupName: "LocalDesk"
-  levelsUsed: LocalLevelName[]
+  levelsUsed: DeskLevelName[]
+  checklist: string[]
+  feedWarning?: string
   reason: string
   congestion: "low" | "medium" | "high"
   indicators: {
@@ -28,7 +35,7 @@ export type DeskPlan = PlanContract & {
   }
 }
 
-type PriceLevel = { name: LocalLevelName; price: number }
+type PriceLevel = { name: LocalAnchorName; price: number }
 
 const roundPrice = (value: number) => Math.round(value * 100) / 100
 const timestampMs = (time: number) => time < 10_000_000_000 ? time * 1_000 : time
@@ -155,20 +162,12 @@ export function buildLocalDeskPlan(symbol: string, candles: Candle[]): DeskPlan 
     ? "Price is holding at or above session VWAP, so the local desk bias is upward."
     : "Price is below session VWAP, so buyers need to reclaim the BUY ZONE before acting."
   const invalidation = `The plan is invalid if a 5-minute candle closes below ${stop}.`
-  const targetNames = [firstTarget?.name, secondTarget?.name].filter((name): name is LocalLevelName => Boolean(name))
-  const levelsUsed = [...new Set<LocalLevelName>([
-    "session-vwap",
-    "opening-range-5m-high",
-    "opening-range-5m-low",
-    "opening-range-15m-high",
-    "opening-range-15m-low",
-    ...(priorRange ? ["prior-session-high" as const, "prior-session-low" as const] : []),
-    "atr-14",
-    ...targetNames,
-    ...(!firstTarget || !secondTarget ? ["risk-projection" as const] : []),
-    entryLevel.name,
-    ...(lowerSupport ? [lowerSupport.name] : ["atr-14" as const]),
-  ])]
+  const levelsUsed: DeskLevelName[] = [
+    "VWAP",
+    "OR",
+    ...(priorRange ? ["PRIOR_H" as const, "PRIOR_L" as const] : []),
+    "ATR",
+  ]
 
   return {
     id: `${symbol}-LocalDesk`,
@@ -191,6 +190,7 @@ export function buildLocalDeskPlan(symbol: string, candles: Candle[]): DeskPlan 
     invalidation,
     ...planLayers(entry, stop, t1, bias, invalidation, rMultiple, "LocalDesk"),
     levelsUsed,
+    checklist: ["Check BUY ZONE", "Set GET OUT", "Place order"],
     reason: bias,
     congestion,
     indicators: {
