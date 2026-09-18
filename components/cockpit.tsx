@@ -7,7 +7,7 @@ import { LocalStructuredAssistant, type JarvisPlan } from "@/lib/assistant"
 import { COPY_LEADERS, leaderSignal } from "@/lib/copytrade"
 import { feedLabel } from "@/lib/market/types"
 import { useMarket } from "@/lib/market/use-market"
-import { positionSize } from "@/lib/paper"
+import { checkRisk, positionSize } from "@/lib/paper"
 import { money, number } from "@/lib/utils"
 import { ChartHud } from "@/components/hud/chart-hud"
 import { useJarvis } from "@/components/jarvis-provider"
@@ -26,7 +26,7 @@ const assistant = new LocalStructuredAssistant()
 
 export function Cockpit({ symbol }: { symbol: string }) {
   const { quote, candles, error } = useMarket(symbol)
-  const { preferences, activePlan, applyPlan, submitOrder } = useJarvis()
+  const { preferences, activePlan, applyPlan, submitOrder, metrics, consecutiveLosses } = useJarvis()
   const [modules, setModules] = useState<Record<string, boolean>>({ esp: true, algo: true, copy: true, risk: true, chat: true })
   const [algos, setAlgos] = useState<Record<AlgoName, boolean>>({ TrendFollow: true, MeanRevert: false, Breakout: true })
   const [pendingPlan, setPendingPlan] = useState<JarvisPlan | null>(null)
@@ -42,6 +42,24 @@ export function Cockpit({ symbol }: { symbol: string }) {
   const plan = activePlan?.symbol === symbol ? activePlan : null
   const displayPlan = pendingPlan ?? plan
   const shares = displayPlan ? positionSize(preferences.equity, preferences.riskPercent, displayPlan.entry, displayPlan.stop) : 0
+  const riskPreview = useMemo(() => {
+    if (!displayPlan || !quote) return null
+    return checkRisk({
+      symbol,
+      side: "BUY",
+      shares,
+      price: quote.price,
+      stop: displayPlan.stop,
+      target: displayPlan.target1,
+      planQuality: displayPlan.quality,
+      mode: preferences.brokerMode,
+    }, {
+      equity: preferences.equity,
+      maxRiskPercent: preferences.maxRiskPercent,
+      minRewardRisk: preferences.minRewardRisk,
+      dailyLossPercent: preferences.dailyLossPercent,
+    }, metrics.totalPnl, consecutiveLosses)
+  }, [consecutiveLosses, displayPlan, metrics.totalPnl, preferences, quote, shares, symbol])
 
   async function askJarvis(signalPool = signals) {
     setBusy(true)
@@ -164,12 +182,23 @@ export function Cockpit({ symbol }: { symbol: string }) {
                 <ol className="mt-3 grid grid-cols-3 gap-px bg-[#2a2a2a]">
                   {displayPlan.checklist.map((item, index) => <li key={item} className="bg-[#141414] p-2 text-[10px] text-[#aaa]"><span className="mono mr-1 text-[#00d4aa]">{index + 1}</span> {item}</li>)}
                 </ol>
+                {riskPreview ? (
+                  <div className={`mt-3 border-l-2 p-2 ${riskPreview.allowed ? "border-[#00d4aa] bg-[#0d1b18]" : "border-[#ff4757] bg-[#1d1011]"}`}>
+                    <div className="flex items-center justify-between">
+                      <strong className={`text-[10px] uppercase tracking-wider ${riskPreview.allowed ? "text-[#00d4aa]" : "text-[#ff6a77]"}`}>
+                        {riskPreview.allowed ? "Risk gate passed" : "Order blocked"}
+                      </strong>
+                      <span className="mono text-[10px] text-[#aaa]">{money(riskPreview.riskDollars)} risk · {riskPreview.rewardRisk.toFixed(1)}R</span>
+                    </div>
+                    {!riskPreview.allowed ? <p className="mt-1 text-[10px] leading-4 text-[#ff8d97]">{riskPreview.reasons.join(" ")}</p> : null}
+                  </div>
+                ) : null}
                 {pendingPlan ? (
                   <Button variant="primary" size="lg" className="mt-3 w-full" onClick={() => { applyPlan(pendingPlan); setPendingPlan(null); setNotice("Waypoints locked on the chart. Check the order, then place it."); }}>
                     <Zap className="size-4" /> Apply Jarvis plan
                   </Button>
                 ) : (
-                  <Button variant="primary" size="lg" className="mt-3 w-full" disabled={displayPlan.quality === "Skip"} onClick={() => void placeOrder()}>
+                  <Button variant="primary" size="lg" className="mt-3 w-full" disabled={!riskPreview?.allowed} onClick={() => void placeOrder()}>
                     <Shield className="size-4" /> Place {preferences.brokerMode === "live" ? "LIVE" : "PAPER"} order
                   </Button>
                 )}

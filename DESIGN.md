@@ -49,6 +49,35 @@ Plain labels can pair a mod name with an explanation: **ESP Levels — Shows whe
 - `LOCK TARGET` is an amber tactical callout, used once.
 - Module toggles resemble a sleek client-mod GUI: compact rows, sharp checkbox, explicit ON/OFF.
 
+## Edge-anchored chrome
+
+The chart remains the world, so controls attach to its edges rather than floating over the center. Symbol and stream status lock to the top edge. Modules and Jarvis lock to the right edge. Plan quality and risk state lock near the order action. The chart center is reserved for price, one entry box, and the active waypoint path.
+
+Waypoints use two channels at once:
+
+1. A thin spatial marker at the exact chart level.
+2. A stable HUD label at the chart edge with the same name and number.
+
+This keeps `ENTRY`, `T1`, `T2`, and `STOP` readable when candles, volume, or crosshairs are visually busy. It also prevents color from carrying meaning by itself.
+
+## Progressive disclosure
+
+- **Beginner (default):** four decision numbers, plan quality, three-step checklist, and plain-English reason.
+- **Why this plan?:** algo name, invalidation, congestion, confidence, and reward:risk definition.
+- **Expert hub:** module tuning and detailed diagnostics. It is opt-in and never the default first-run surface.
+
+Jarvis should feel powerful because it removes uncertainty, not because it fills every pixel. Avoid film-HUD density, rainbow ESP soup, duplicate reticles, decorative telemetry, and day-one terminal overload.
+
+## Competitive wedge
+
+Jarvis does not attempt to out-chart TradingView. The MVP wins on:
+
+- spatial decision guidance that remains legible under chart load;
+- enforced risk checks that block bad size, weak reward:risk, daily-loss breaches, anti-tilt states, and `Skip` plans before the click;
+- one clear transition from a proposed plan to a protected order.
+
+Warnings without enforcement are insufficient for risk failures. When an order is blocked, disable the primary action and place the plain-English reason next to it.
+
 ## Do
 
 - Keep the chart at least half the cockpit width.
