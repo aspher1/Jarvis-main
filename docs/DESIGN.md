@@ -1,4 +1,4 @@
-# Jarvis — Design Spec v0.2.1 (SoT)
+# Jarvis — Design Spec v0.2.4 (SoT)
 
 **Owner:** VP of Design · **Report to:** COO only · **Do not merge**  
 **Repo:** https://github.com/aspher1/Jarvis-main  
@@ -33,6 +33,42 @@ Still forbidden: scraping broker cookies, injecting into Robinhood/ToS/TV *auth*
 PAPER default. LIVE Alpaca only with explicit typed confirm + keys.
 
 Beginner should feel: **“I turned on the hacks and now I can SEE what to do.”**
+
+### Kid-clear overlay copy (P0 — locked)
+
+Waypoint / ESP labels on the chart must be readable by a **middle schooler**. Prefer these exact primary strings:
+
+| Level | On-chart label (primary) | Optional plain subtitle |
+|-------|--------------------------|-------------------------|
+| Entry zone | **BUY ZONE** | “Buy here” |
+| Take profit | **TAKE PROFIT** | “Take some money off” |
+| Stop / invalidation | **GET OUT** | “Leave if price hits here” |
+
+- **Finger / arrow cues:** each active waypoint shows a simple ▶ / 👆-style pointer (or chevron) aimed at the price level — not cryptic T1/T2/STOP alone. Pro mode may show `T1` / `STOP` as secondary micro-text under the kid-clear label.
+- Default Beginner view hides jargon (`R-multiple`, `VWAP`, `ESP`) unless expanded in Details.
+- Still pair color + word (never color alone).
+
+### Dual-layer plan UX (P0 — locked)
+
+| Layer | What shows | Rules |
+|-------|------------|-------|
+| **Surface (default)** | **BUY ZONE / TAKE PROFIT / GET OUT** + finger/arrow cues + exact prices on the chart | Middle-school readable; no bias/R jargon on the surface |
+| **Pro desk (“Why”)** | Behind a **Why** expander only: bias, invalidation, R (reward:risk), optional setup name | Collapsed by default in Beginner; never replaces surface labels |
+
+**Exact level placement (P0):** BUY ZONE / TAKE PROFIT / GET OUT must sit on the **precise chart price** from the plan (algo/template/LLM) — not rounded decorative bands that miss the number. Band/ESP fill may be thin around the level; the **label + tip of the arrow/finger points at the exact price**. Show the numeric price next to the kid-clear label (mono/`tnum`).
+
+Algos / copy / LLM planners output both layers: surface labels + optional Why fields. UI must not dump Why onto the chart by default.
+
+### Analysis tiers (product + copy)
+
+| Tier | Default? | What the UI says |
+|------|----------|------------------|
+| **FREE local realtime** | **Yes** | “Live analysis on this chart (free)” — algos + templates on the stream |
+| **Paid LLM assistant** | Opt-in | “AI helper (paid · limited uses)” — throttle remaining uses in plain English |
+
+Never imply the free tier is “dumb” or the paid tier “guarantees wins.”
+Always: **Not financial advice. Trading can lose money including your full account.**
+Forbidden: guaranteed profit, get rich, always wins, risk-free.
 
 ---
 
@@ -99,20 +135,30 @@ Leave host chrome alone (TV / Webull / Yahoo). Jarvis draws *on top* via extensi
 |-----|------|-------|
 | Prices, qty, levels, lag | JetBrains Mono / IBM Plex Mono + `tnum` | Numbers only |
 | Labels / plain English | Inter | Micro labels 10–12px OK |
-| Beginner decision card | Larger | Entry · Stop · Target · Shares |
+| Beginner decision card | Larger | **BUY ZONE · TAKE PROFIT · GET OUT** · Shares |
 
 Color never alone — pair with BUY/SELL or ▲/▼.
 
 ---
 
-## 3. Plain English (P0)
+## 3. Plain English string table (P0 — matches kid-clear overlay)
 
-“Buy here” · “Stop loss (get out if wrong)” · “Target 1 (take some profit)”  
-Jargon → one-line definition. Beginner default.  
-Signals: **“In plain English: …”**  
-Plan checklist: (1) Check entry (2) Set stop (3) Place order  
+| Role | Primary (on-chart / UI) | Secondary / subtitle |
+|------|-------------------------|----------------------|
+| Entry | **BUY ZONE** | Buy here |
+| Take profit | **TAKE PROFIT** | Take some money off |
+| Stop / exit | **GET OUT** | Leave if price hits here |
+| Analysis default | Live analysis on this chart (free) | FREE local algos + templates on stream |
+| Paid LLM | AI helper (paid · limited uses) | Opt-in; show remaining uses |
+| Paper | Practice money (Paper) | — |
+| Live | Real money (Live) | Typed confirm required |
+| Feed | Prices: Live · Xms / Delayed · ~15m / POLLING (slower) | — |
 
-Badges: `Practice money (Paper)` · `Real money (Live)` · `Prices: Live · 42ms` · `Prices: Delayed · ~15m`
+Finger/arrow cues on every active BUY ZONE / TAKE PROFIT / GET OUT.
+Jargon (`T1`, `STOP`, `R-multiple`) = secondary micro-text in Pro only, or Details.
+Signals: **“In plain English: …”**
+Plan checklist: (1) Check BUY ZONE (2) Set GET OUT (3) Place order
+**Why** expander (optional): bias · invalidation · R — exact prices still on surface
 
 ---
 
@@ -142,7 +188,7 @@ Beginner modules default ON: ESP Levels · Waypoint Targets · Risk Calc · Jarv
 
 PASS if a non-trader answers in <10s on a **host page with overlay:**
 
-1. ENTRY / STOP / T1–T2 visible on chart
+1. **BUY ZONE / TAKE PROFIT / GET OUT** visible on chart (finger/arrow cues)
 2. Paper vs Live
 3. Live vs Delayed prices
 4. Can hide Jarvis in one click/hotkey without reloading the host
@@ -178,4 +224,4 @@ Secondary: standalone cockpit shots matching the same language.
 
 ---
 
-*Jarvis Design Spec v0.2.1 · 2026-09-18 · VP of Design · multi-host overlay (TV + Webull + Yahoo + Universal)*
+*Jarvis Design Spec v0.2.4 · 2026-09-18 · VP of Design · dual-layer surface + Why expander; exact level placement*

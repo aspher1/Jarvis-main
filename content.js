@@ -3,62 +3,62 @@
 
   const HOST_ID = "jarvis-multi-host-hud";
   const STORAGE_KEY = "jarvis-hud-preferences-v1";
-  const LEVELS = [
+  const LEVEL_CONFIG = [
     {
       id: "t2",
+      field: "t2",
       short: "T2",
       name: "Target 2",
-      plain: "Take the rest of the profit",
+      plain: "Take some money off",
       hudLabel: "TAKE PROFIT",
       hudArrow: "↑",
-      price: "$192.80",
-      ratio: 0.24,
-      distance: "+2.0R",
       color: "#A6FF4D",
     },
     {
       id: "t1",
+      field: "t1",
       short: "T1",
       name: "Target 1",
-      plain: "Take some profit",
+      plain: "Take some money off",
       hudLabel: "TAKE PROFIT",
       hudArrow: "↑",
-      price: "$190.40",
-      ratio: 0.39,
-      distance: "+1.0R",
       color: "#00D4AA",
     },
     {
       id: "entry",
+      field: "entry",
       short: "ENTRY",
       name: "Entry",
       plain: "Buy here",
       hudLabel: "BUY ZONE",
       hudArrow: "→",
-      price: "$188.00",
-      ratio: 0.56,
-      distance: "0R",
       color: "#00D4AA",
     },
     {
       id: "stop",
+      field: "stop",
       short: "STOP",
       name: "Stop loss",
-      plain: "Get out if wrong",
+      plain: "Leave if price hits here",
       hudLabel: "GET OUT",
       hudArrow: "↓",
-      price: "$185.60",
-      ratio: 0.73,
-      distance: "−1.0R",
       color: "#FF4757",
     },
   ];
+  const MOCK_DESK_PLAN = Object.freeze({
+    entry: "188.037500",
+    stop: "186.912500",
+    t1: "189.162500",
+    t2: "190.287500",
+    invalidation: "Mock only — no live signal is connected.",
+    quality: "Okay",
+  });
 
   const defaultPreferences = {
     esp: true,
     waypoints: true,
     risk: true,
-    chat: true,
+    chat: false,
     overlaysVisible: true,
     collapsed: false,
   };
@@ -69,6 +69,8 @@
   let shadow;
   let chartBounds;
   let activeAdapter;
+  let activeEnvelope;
+  let lastSequence = -1;
   let refreshTimer;
   let lastUrl = location.href;
 
@@ -89,6 +91,43 @@
     } catch {
       // The HUD still works if TradingView storage is unavailable.
     }
+  }
+
+  function levelsForPlan(plan, projection) {
+    return LEVEL_CONFIG.filter(
+      (level) => plan[level.field] !== undefined,
+    ).map((level) => ({
+      ...level,
+      price: plan[level.field],
+      ratio: projection?.[level.field],
+    }));
+  }
+
+  function currentLevels() {
+    if (!activeEnvelope) return [];
+    return levelsForPlan(activeEnvelope.plan, activeEnvelope.projection);
+  }
+
+  function setGapState(reason = "Waiting for an exact live DeskPlan") {
+    activeEnvelope = undefined;
+    if (!shadow) return;
+    renderPlan();
+    shadow.querySelector(".gap-copy").textContent = reason;
+    updateLayout();
+  }
+
+  function handlePlanMessage(event) {
+    if (event.source !== window) return;
+    const envelope = globalThis.JarvisDeskPlan.validateEnvelope(
+      event.data,
+      lastSequence,
+    );
+    if (!envelope) return;
+
+    lastSequence = envelope.sequence;
+    activeEnvelope = envelope;
+    renderPlan();
+    updateLayout();
   }
 
   function isVisible(rect) {
@@ -198,23 +237,6 @@
         stroke-width: 1;
         stroke-dasharray: 4 5;
         opacity: 0.58;
-      }
-
-      .anchor {
-        fill: #0D0D0D;
-        stroke: #E7EAF0;
-        stroke-width: 1;
-      }
-
-      .anchor-label {
-        position: absolute;
-        padding: 3px 6px;
-        color: #E7EAF0;
-        background: var(--jarvis-label-bg);
-        border: 1px solid var(--jarvis-label-border);
-        font: 600 9px/1.2 "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-        letter-spacing: .06em;
-        white-space: nowrap;
       }
 
       .waypoint {
@@ -452,6 +474,36 @@
         font: 650 10px/1 ui-monospace, monospace;
       }
 
+      .gap-state {
+        padding: 12px 9px;
+        color: var(--jarvis-warning);
+        font-size: 9px;
+        line-height: 1.35;
+      }
+
+      .why-panel {
+        margin: 7px 8px 0;
+        color: #AFB4BD;
+        background: #151515;
+        border: 1px solid var(--jarvis-border);
+        font-size: 9px;
+        line-height: 1.4;
+      }
+
+      .why-panel summary {
+        padding: 7px;
+        color: #E4E6EA;
+        cursor: pointer;
+      }
+
+      .why-content {
+        padding: 0 7px 7px;
+        border-top: 1px solid var(--jarvis-border);
+      }
+
+      .why-content p { margin: 6px 0 0; }
+      .why-content strong { color: #F4F5F7; }
+
       .modules {
         margin: 0 8px;
         border: 1px solid var(--jarvis-border);
@@ -582,9 +634,7 @@
         <svg class="chart-svg" xmlns="http://www.w3.org/2000/svg">
           <rect class="entry-zone"></rect>
           <g class="tracers"></g>
-          <circle class="anchor" r="4"></circle>
         </svg>
-        <div class="anchor-label">DEMO LAST PRICE</div>
         <div class="waypoints"></div>
       </div>
 
@@ -608,24 +658,24 @@
             </div>
             <div class="badge delayed">
               <span>Price feed</span>
-              <strong>Delayed · ~15m</strong>
+              <strong class="feed-value">MOCK · demo prices</strong>
             </div>
             <div class="badge mode">
               <span>Analysis mode</span>
-              <strong>FREE local analysis</strong>
+              <strong class="analysis-value">Local analysis unavailable · MOCK plan</strong>
             </div>
           </div>
 
           <div class="section-label">
             <span>Plan waypoints</span>
-            <span class="demo-chip">Mock levels</span>
+            <span class="demo-chip plan-state">Gap · no levels</span>
           </div>
           <div class="level-list"></div>
 
           <div class="section-label"><span>Beginner modules</span></div>
           <div class="modules">
             <label class="module">
-              <span><strong>ESP Levels</strong><span>Show the entry area and guide lines.</span></span>
+              <span><strong>Chart Levels</strong><span>Show the exact plan prices and guide lines.</span></span>
               <button class="toggle" type="button" role="switch" data-module="esp" aria-label="Toggle ESP Levels"></button>
             </label>
             <label class="module">
@@ -637,14 +687,15 @@
               <button class="toggle" type="button" role="switch" data-module="risk" aria-label="Toggle Risk Calc"></button>
             </label>
             <label class="module">
-              <span><strong>Jarvis Chat</strong><span>Ask for a plain-English plan explanation.</span></span>
+              <span><strong>Jarvis Chat</strong><span>AI helper (paid · limited uses) · opt-in only.</span></span>
               <button class="toggle" type="button" role="switch" data-module="chat" aria-label="Toggle Jarvis Chat"></button>
             </label>
           </div>
 
-          <div class="risk-note">
-            <strong>Example risk:</strong> $2.40 per share from entry to stop. Check entry → set stop → place a paper order.
-          </div>
+          <details class="why-panel is-hidden">
+            <summary>Why <span aria-hidden="true">▸</span> <small>Pro desk</small></summary>
+            <div class="why-content"></div>
+          </details>
           <div class="control-row">
             <button class="hide-button overlay-button" type="button">Hide ESP</button>
             <button class="hide-button jarvis-button" type="button" title="Press the backtick key to show Jarvis again">Hide Jarvis · hotkey</button>
@@ -658,45 +709,102 @@
     shadow.append(style, root);
     document.documentElement.appendChild(host);
 
-    renderLevelList();
-    renderWaypoints();
+    renderPlan();
     bindControls();
     applyPreferences();
     updateLayout();
   }
 
-  function renderLevelList() {
+  function renderPlan() {
     const list = shadow.querySelector(".level-list");
-    for (const level of LEVELS) {
+    const container = shadow.querySelector(".waypoints");
+    const tracers = shadow.querySelector(".tracers");
+    const feedValue = shadow.querySelector(".feed-value");
+    const analysisValue = shadow.querySelector(".analysis-value");
+    const planState = shadow.querySelector(".plan-state");
+    const delayedWarning = shadow.querySelector(".delayed-warning");
+    const whyPanel = shadow.querySelector(".why-panel");
+    const whyContent = shadow.querySelector(".why-content");
+    const whyWasOpen = whyPanel.open;
+    list.replaceChildren();
+    container.replaceChildren();
+    tracers.replaceChildren();
+    whyContent.replaceChildren();
+
+    const appendListRow = (level) => {
       const row = document.createElement("div");
       row.className = "level";
       row.style.setProperty("--level-color", level.color);
 
       const key = document.createElement("span");
       key.className = "level-key";
-      key.textContent = level.short;
+      key.textContent = level.hudArrow;
 
       const copy = document.createElement("span");
       copy.className = "level-copy";
       const title = document.createElement("strong");
-      title.textContent = level.name;
-      const plain = document.createElement("span");
-      plain.textContent = level.plain;
-      copy.append(title, plain);
+      title.textContent = level.hudLabel;
+      const listPlain = document.createElement("span");
+      listPlain.textContent = level.plain;
+      copy.append(title, listPlain);
 
-      const price = document.createElement("span");
-      price.className = "level-price";
-      price.textContent = level.price;
-      row.append(key, copy, price);
+      const listPrice = document.createElement("span");
+      listPrice.className = "level-price";
+      listPrice.textContent = level.price;
+      row.append(key, copy, listPrice);
       list.appendChild(row);
+    };
+
+    const renderWhy = (plan) => {
+      const whyFields = [
+        ["Quality", plan.quality],
+        ["Invalidation", plan.invalidation],
+        ["Bias", plan.bias],
+        ["Reward:risk", plan.rewardRisk],
+        ["Setup", plan.setupName],
+      ];
+      for (const [label, value] of whyFields) {
+        if (!value) continue;
+        const line = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = `${label}: `;
+        line.append(strong, document.createTextNode(String(value)));
+        whyContent.appendChild(line);
+      }
+    };
+
+    if (!activeEnvelope) {
+      const gap = document.createElement("div");
+      gap.className = "gap-state gap-copy";
+      gap.textContent = "MOCK plan · waiting for an exact live DeskPlan";
+      list.appendChild(gap);
+      for (const level of levelsForPlan(MOCK_DESK_PLAN)) appendListRow(level);
+      feedValue.textContent = "MOCK · demo prices";
+      analysisValue.textContent = "Local analysis unavailable · MOCK plan";
+      planState.textContent = `MOCK · Quality: ${MOCK_DESK_PLAN.quality}`;
+      delayedWarning.textContent =
+        "Mock dock only — chart ESP is off until an exact live stream arrives.";
+      delayedWarning.classList.remove("is-hidden");
+      whyPanel.classList.toggle("is-hidden", !preferences.risk);
+      whyPanel.open = whyWasOpen;
+      renderWhy(MOCK_DESK_PLAN);
+      return;
     }
-  }
 
-  function renderWaypoints() {
-    const container = shadow.querySelector(".waypoints");
-    const tracers = shadow.querySelector(".tracers");
+    const levels = currentLevels();
+    const lag = Math.max(0, Date.now() - activeEnvelope.observedAt);
+    feedValue.textContent = `Prices: Live · ${lag}ms`;
+    analysisValue.textContent = "Live analysis on this chart (free)";
+    planState.textContent = `Quality: ${activeEnvelope.plan.quality}`;
+    delayedWarning.classList.add("is-hidden");
+    whyPanel.classList.toggle("is-hidden", !preferences.risk);
+    whyPanel.open = whyWasOpen;
 
-    for (const level of LEVELS) {
+    renderWhy(activeEnvelope.plan);
+
+    for (const level of levels) {
+      appendListRow(level);
+
       const waypoint = document.createElement("div");
       waypoint.className = `waypoint ${level.id}`;
       waypoint.dataset.level = level.id;
@@ -709,12 +817,12 @@
       label.className = "waypoint-label";
       const name = document.createElement("strong");
       name.textContent = `${level.hudArrow} ${level.hudLabel}`;
-      const price = document.createElement("span");
-      price.className = "price";
-      price.textContent = `${level.price} · ${level.distance}`;
-      const plain = document.createElement("small");
-      plain.textContent = `${level.short} · ${level.plain}`;
-      label.append(name, price, plain);
+      const waypointPrice = document.createElement("span");
+      waypointPrice.className = "price";
+      waypointPrice.textContent = level.price;
+      const waypointPlain = document.createElement("small");
+      waypointPlain.textContent = level.plain;
+      label.append(name, waypointPrice, waypointPlain);
       waypoint.append(beacon, label);
       container.appendChild(waypoint);
 
@@ -825,14 +933,11 @@
       .querySelector(".waypoints")
       .classList.toggle("is-hidden", !preferences.waypoints);
     shadow
-      .querySelector(".anchor")
-      .classList.toggle("is-hidden", !preferences.esp);
-    shadow
-      .querySelector(".anchor-label")
-      .classList.toggle("is-hidden", !preferences.esp);
-    shadow
-      .querySelector(".risk-note")
-      .classList.toggle("is-hidden", !preferences.risk);
+      .querySelector(".why-panel")
+      .classList.toggle(
+        "is-hidden",
+        !preferences.risk || !activeEnvelope,
+      );
 
     const hideButton = shadow.querySelector(".overlay-button");
     hideButton.textContent = preferences.overlaysVisible
@@ -844,10 +949,19 @@
 
   function updateLayout() {
     if (!shadow) return;
+    if (
+      activeEnvelope &&
+      Date.now() - activeEnvelope.observedAt >
+        globalThis.JarvisDeskPlan.STALE_AFTER_MS
+    ) {
+      setGapState("Live stream became stale — exact levels cleared");
+      return;
+    }
+
     const requestedAdapter =
       globalThis.JarvisHostAdapters.adapterForLocation(location);
-    chartBounds = findChartBounds(requestedAdapter);
-    const resolvedAdapter = chartBounds
+    chartBounds = activeEnvelope ? findChartBounds(requestedAdapter) : null;
+    const resolvedAdapter = chartBounds && activeEnvelope
       ? requestedAdapter
       : globalThis.JarvisHostAdapters.universal;
     if (resolvedAdapter !== activeAdapter) applyHostAdapter(resolvedAdapter);
@@ -879,35 +993,26 @@
       chartBounds.left + chartBounds.width * 0.68,
       chartBounds.right - 205,
     );
-    const anchorX = chartBounds.left + chartBounds.width * 0.58;
-    const anchorY = chartBounds.top + chartBounds.height * 0.62;
+    const levels = currentLevels();
     const zone = shadow.querySelector(".entry-zone");
+    const entry = levels.find((level) => level.id === "entry");
     const entryY =
-      chartBounds.top +
-      chartBounds.height * LEVELS.find((level) => level.id === "entry").ratio;
+      chartBounds.top + chartBounds.height * entry.ratio;
 
     zone.setAttribute("x", String(chartBounds.left + 35));
-    zone.setAttribute("y", String(entryY - 16));
+    zone.setAttribute("y", String(entryY - 4));
     zone.setAttribute("width", String(Math.max(80, chartBounds.width - 75)));
-    zone.setAttribute("height", "32");
+    zone.setAttribute("height", "8");
 
-    const anchor = shadow.querySelector(".anchor");
-    anchor.setAttribute("cx", String(anchorX));
-    anchor.setAttribute("cy", String(anchorY));
-
-    const anchorLabel = shadow.querySelector(".anchor-label");
-    anchorLabel.style.left = `${anchorX + 8}px`;
-    anchorLabel.style.top = `${anchorY + 7}px`;
-
-    for (const level of LEVELS) {
+    for (const level of levels) {
       const y = chartBounds.top + chartBounds.height * level.ratio;
       const waypoint = shadow.querySelector(`[data-level="${level.id}"].waypoint`);
       waypoint.style.left = `${markerX}px`;
       waypoint.style.top = `${y}px`;
 
       const tracer = shadow.querySelector(`line[data-level="${level.id}"]`);
-      tracer.setAttribute("x1", String(anchorX));
-      tracer.setAttribute("y1", String(anchorY));
+      tracer.setAttribute("x1", String(chartBounds.left + 35));
+      tracer.setAttribute("y1", String(y));
       tracer.setAttribute("x2", String(markerX));
       tracer.setAttribute("y2", String(y));
     }
@@ -932,6 +1037,7 @@
 
   window.addEventListener("resize", scheduleRefresh, { passive: true });
   window.addEventListener("scroll", scheduleRefresh, { passive: true });
+  window.addEventListener("message", handlePlanMessage);
   document.addEventListener("keydown", handleHotkey, true);
 
   const observer = new MutationObserver(scheduleRefresh);

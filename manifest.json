@@ -10,6 +10,7 @@
       ],
       "js": [
         "adapters.js",
+        "desk-plan.js",
         "content.js"
       ],
       "run_at": "document_idle"
