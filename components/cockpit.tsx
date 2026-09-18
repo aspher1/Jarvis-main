@@ -72,6 +72,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
       price: quote.price,
       stop: plan.stop,
       target: plan.target1,
+      planQuality: plan.quality,
       mode: preferences.brokerMode,
     }, quote.feed === "live")
     setNotice(result.error ?? `${preferences.brokerMode === "live" ? "LIVE" : "PAPER"} order filled in ${result.fill?.ackMs}ms.`)
@@ -168,7 +169,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
                     <Zap className="size-4" /> Apply Jarvis plan
                   </Button>
                 ) : (
-                  <Button variant="primary" size="lg" className="mt-3 w-full" onClick={() => void placeOrder()}>
+                  <Button variant="primary" size="lg" className="mt-3 w-full" disabled={plan.quality === "Skip"} onClick={() => void placeOrder()}>
                     <Shield className="size-4" /> Place {preferences.brokerMode === "live" ? "LIVE" : "PAPER"} order
                   </Button>
                 )}

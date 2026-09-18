@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import type { JarvisPlan } from "@/lib/assistant"
 import { checkRisk, journalMetrics, type BrokerMode, type Fill, type OrderRequest, type Position, type RiskCheck } from "@/lib/paper"
 
@@ -59,9 +59,9 @@ const DEFAULT_PREFERENCES: Preferences = {
 }
 
 const DEMO_FILLS: Fill[] = [
-  { id: "demo-1", symbol: "AAPL", side: "SELL", shares: 18, price: 229.42, stop: 227.9, target: 232.46, mode: "paper", filledAt: Date.now() - 86_400_000, status: "FILLED", ackMs: 22, pnl: 54.72, rResult: 2, hasStop: true },
-  { id: "demo-2", symbol: "SPY", side: "SELL", shares: 6, price: 657.18, stop: 658.02, target: 655.5, mode: "paper", filledAt: Date.now() - 43_200_000, status: "FILLED", ackMs: 18, pnl: -30.24, rResult: -1, hasStop: true },
-  { id: "demo-3", symbol: "NVDA", side: "SELL", shares: 30, price: 183.88, stop: 182.9, target: 185.84, mode: "paper", filledAt: Date.now() - 21_600_000, status: "FILLED", ackMs: 16, pnl: 58.8, rResult: 2, hasStop: true },
+  { id: "demo-1", symbol: "AAPL", side: "SELL", shares: 18, price: 229.42, stop: 227.9, target: 232.46, planQuality: "Okay", mode: "paper", filledAt: Date.now() - 86_400_000, status: "FILLED", ackMs: 22, pnl: 54.72, rResult: 2, hasStop: true },
+  { id: "demo-2", symbol: "SPY", side: "SELL", shares: 6, price: 657.18, stop: 658.02, target: 655.5, planQuality: "Okay", mode: "paper", filledAt: Date.now() - 43_200_000, status: "FILLED", ackMs: 18, pnl: -30.24, rResult: -1, hasStop: true },
+  { id: "demo-3", symbol: "NVDA", side: "SELL", shares: 30, price: 183.88, stop: 182.9, target: 185.84, planQuality: "Strong", mode: "paper", filledAt: Date.now() - 21_600_000, status: "FILLED", ackMs: 16, pnl: 58.8, rResult: 2, hasStop: true },
 ]
 
 const JarvisContext = createContext<JarvisState | null>(null)
@@ -79,8 +79,7 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
     finnhubConfigured: false,
   })
 
-  useState(() => {
-    if (typeof window === "undefined") return
+  useEffect(() => {
     try {
       const stored = window.localStorage.getItem("jarvis-state-v1")
       if (stored) {
@@ -94,7 +93,7 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
     } catch {
       // Corrupt local state falls back to safe defaults.
     }
-  })
+  }, [])
 
   const persist = useCallback((next: Partial<{ watchlist: string[]; preferences: Preferences; fills: Fill[]; positions: Position[] }>) => {
     if (typeof window === "undefined") return
@@ -127,7 +126,11 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
   const applyPlan = (plan: JarvisPlan) => setActivePlan(plan)
   const metrics = useMemo(() => journalMetrics(fills), [fills])
   const closed = fills.filter((fill) => fill.side === "SELL" && !fill.id.startsWith("demo-"))
-  const consecutiveLosses = [...closed].reverse().findIndex((fill) => fill.pnl >= 0)
+  let consecutiveLosses = 0
+  for (const fill of closed) {
+    if (fill.pnl >= 0) break
+    consecutiveLosses += 1
+  }
   const dailyLocked = metrics.totalPnl <= -(preferences.equity * preferences.dailyLossPercent) / 100
   const paperProofCount = closed.filter((fill) => fill.hasStop && fill.mode === "paper").length
 
@@ -137,9 +140,8 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
       maxRiskPercent: preferences.maxRiskPercent,
       minRewardRisk: preferences.minRewardRisk,
       dailyLossPercent: preferences.dailyLossPercent,
-    }, metrics.totalPnl)
+    }, metrics.totalPnl, consecutiveLosses)
     if (!risk.allowed) return { risk, error: risk.reasons.join(" ") }
-    if (consecutiveLosses >= 2) return { risk, error: "Two losses in a row. Take a 15-minute cooldown before another entry." }
 
     if (order.mode === "live") {
       if (!config.brokerModeAllowed || !config.alpacaConfigured) return { risk, error: "Live broker is not configured on the server." }
@@ -149,7 +151,18 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
       const response = await fetch("/api/broker", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order, acknowledgment: preferences.liveAcknowledgment, safeUnlockPassed: !preferences.safeUnlock || paperProofCount >= 10 }),
+        body: JSON.stringify({
+          order,
+          acknowledgment: preferences.liveAcknowledgment,
+          safeUnlockPassed: !preferences.safeUnlock || paperProofCount >= 10,
+          riskRules: {
+            equity: preferences.equity,
+            maxRiskPercent: preferences.maxRiskPercent,
+            minRewardRisk: preferences.minRewardRisk,
+            dailyLossPercent: preferences.dailyLossPercent,
+          },
+          riskState: { dailyPnl: metrics.totalPnl, consecutiveLosses },
+        }),
       })
       const result = await response.json()
       if (!response.ok) return { risk, error: result.error }
@@ -174,7 +187,7 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
     if (!position) return
     const pnl = (price - position.averagePrice) * position.shares
     const riskPerShare = Math.max(0.01, position.averagePrice - position.stop)
-    const fill: Fill = { symbol, side: "SELL", shares: position.shares, price, stop: position.stop, target: position.target, mode: "paper", id: `paper-${crypto.randomUUID()}`, filledAt: Date.now(), status: "FILLED", ackMs: 12, pnl, rResult: pnl / (riskPerShare * position.shares), hasStop: true }
+    const fill: Fill = { symbol, side: "SELL", shares: position.shares, price, stop: position.stop, target: position.target, planQuality: "Okay", mode: "paper", id: `paper-${crypto.randomUUID()}`, filledAt: Date.now(), status: "FILLED", ackMs: 12, pnl, rResult: pnl / (riskPerShare * position.shares), hasStop: true }
     const nextFills = [fill, ...fills]
     const nextPositions = positions.filter((item) => item.symbol !== symbol)
     setFills(nextFills)
@@ -182,9 +195,9 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
     persist({ fills: nextFills, positions: nextPositions })
   }
   const flattenAll = () => positions.forEach((position) => flatten(position.symbol, position.currentPrice))
-  const updatePrice = (symbol: string, price: number) => {
+  const updatePrice = useCallback((symbol: string, price: number) => {
     setPositions((current) => current.map((position) => position.symbol === symbol ? { ...position, currentPrice: price } : position))
-  }
+  }, [])
 
   return <JarvisContext.Provider value={{ watchlist, preferences, fills, positions, activePlan, config, addSymbol, removeSymbol, updatePreferences, applyPlan, submitOrder, flatten, flattenAll, updatePrice, metrics, consecutiveLosses, dailyLocked, paperProofCount }}>{children}</JarvisContext.Provider>
 }

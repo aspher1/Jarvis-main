@@ -26,7 +26,7 @@ const average = (values: number[]) => values.reduce((sum, value) => sum + value,
 
 export function scorePlan(rewardRisk: number, stopDistancePercent: number, congestion: Signal["congestion"]): PlanQuality {
   if (rewardRisk < 2 || congestion === "high" || stopDistancePercent > 3) return "Skip"
-  if (rewardRisk >= 2.5 && congestion === "low" && stopDistancePercent <= 2) return "Strong"
+  if (rewardRisk >= 2 && congestion === "low" && stopDistancePercent <= 2) return "Strong"
   return "Okay"
 }
 
@@ -34,7 +34,7 @@ function signal(symbol: string, algo: AlgoName, entry: number, stop: number, con
   const risk = Math.abs(entry - stop)
   const target1 = entry + risk * 2
   const target2 = entry + risk * 3
-  const rewardRisk = round((target2 - entry) / risk)
+  const rewardRisk = round((target1 - entry) / risk)
   const quality = scorePlan(rewardRisk, (risk / entry) * 100, congestion)
   return {
     id: `${symbol}-${algo}`,

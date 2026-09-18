@@ -7,7 +7,11 @@ export function GET() {
     feed,
     brokerModeAllowed: process.env.BROKER_MODE === "live",
     alpacaConfigured: Boolean(process.env.ALPACA_API_KEY && process.env.ALPACA_API_SECRET),
-    polygonConfigured: Boolean(process.env.POLYGON_API_KEY),
-    finnhubConfigured: Boolean(process.env.FINNHUB_API_KEY),
+    polygonConfigured: false,
+    finnhubConfigured: false,
+    disabledAdapters: {
+      polygon: "Disabled until its snapshot path is implemented and verified.",
+      finnhub: "Disabled until its snapshot path is implemented and verified.",
+    },
   })
 }

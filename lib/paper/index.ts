@@ -7,6 +7,7 @@ export type OrderRequest = {
   price: number
   stop: number
   target: number
+  planQuality: "Strong" | "Okay" | "Skip"
   mode: BrokerMode
 }
 
@@ -50,15 +51,24 @@ export interface Broker {
   flatten(symbol: string, price: number): Promise<Fill | null>
 }
 
-export function checkRisk(order: OrderRequest, rules: RiskRules, dailyPnl: number): RiskCheck {
+export function checkRisk(
+  order: OrderRequest,
+  rules: RiskRules,
+  dailyPnl: number,
+  consecutiveLosses = 0,
+  allowSkipOverride = false,
+): RiskCheck {
   const riskDollars = Math.abs(order.price - order.stop) * order.shares
   const riskPercent = (riskDollars / rules.equity) * 100
   const rewardRisk = Math.abs(order.target - order.price) / Math.max(0.01, Math.abs(order.price - order.stop))
   const reasons: string[] = []
+  if (order.planQuality === "Skip" && !allowSkipOverride) reasons.push("This plan is rated Skip. Low-quality plans cannot be ordered.")
   if (riskPercent > rules.maxRiskPercent) reasons.push(`Risk is ${riskPercent.toFixed(2)}%. Your maximum is ${rules.maxRiskPercent}%.`)
   if (rewardRisk < rules.minRewardRisk) reasons.push(`Possible reward is only ${rewardRisk.toFixed(1)}R. Minimum is ${rules.minRewardRisk}R.`)
   if (dailyPnl <= -(rules.equity * rules.dailyLossPercent) / 100) reasons.push("Daily loss limit reached. New entries are locked.")
+  if (consecutiveLosses >= 2) reasons.push("Two losses in a row. New entries are locked for an anti-tilt cooldown.")
   if (!order.stop || order.stop >= order.price) reasons.push("Add a stop loss below the entry before buying.")
+  if (!Number.isFinite(order.shares) || order.shares <= 0) reasons.push("Share quantity must be greater than zero.")
   return { allowed: reasons.length === 0, riskDollars, riskPercent, rewardRisk, reasons }
 }
 

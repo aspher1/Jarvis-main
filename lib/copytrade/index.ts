@@ -24,8 +24,8 @@ export const COPY_LEADERS: CopyLeader[] = [
     note: "Waits for a pullback inside a stronger upward trend.",
   },
   {
-    id: "riskzero",
-    name: "RiskZero",
+    id: "capitalguard",
+    name: "CapitalGuard",
     style: "Capital defense",
     trackRecord: "SIMULATED · 2.6 avg R:R",
     note: "Takes fewer setups and demands at least twice the possible reward.",
@@ -37,7 +37,7 @@ export function leaderSignal(leaderId: string, base: Signal): Signal {
   return {
     ...base,
     id: `${base.id}-${leader.id}`,
-    confidence: Math.max(52, base.confidence - (leader.id === "riskzero" ? 0 : 4)),
+    confidence: Math.max(52, base.confidence - (leader.id === "capitalguard" ? 0 : 4)),
     plainEnglish: `${leader.name} would follow this ${base.quality.toLowerCase()} setup. This is a simulated signal, not a copied real account.`,
     reason: `${leader.note} ${base.reason}`,
   }

@@ -69,36 +69,6 @@ export async function GET(request: Request) {
         return
       }
 
-      if (provider.name === "Polygon") {
-        socket = new WebSocket("wss://socket.polygon.io/stocks")
-        socket.addEventListener("open", () => socket?.send(JSON.stringify({ action: "auth", params: process.env.POLYGON_API_KEY })))
-        socket.addEventListener("message", (event) => {
-          const messages = JSON.parse(String(event.data)) as Array<Record<string, number | string>>
-          if (messages.some((message) => message.status === "auth_success")) {
-            socket?.send(JSON.stringify({ action: "subscribe", params: `T.${symbol},Q.${symbol}` }))
-          }
-          for (const message of messages) {
-            if (message.ev !== "T") continue
-            const timestamp = Number(message.t)
-            const price = Number(message.p)
-            controller.enqueue(encode({
-              symbol,
-              price,
-              bid: price,
-              ask: price,
-              change: 0,
-              changePercent: 0,
-              timestamp,
-              feed: "live",
-              provider: "Polygon",
-              lagMs: Math.max(0, Date.now() - timestamp),
-            }))
-          }
-        })
-        socket.addEventListener("error", () => void sendSnapshot())
-        return
-      }
-
       const interval = setInterval(() => void sendSnapshot(), provider.kind === "mock" ? 750 : 5000)
       request.signal.addEventListener("abort", () => clearInterval(interval))
     },

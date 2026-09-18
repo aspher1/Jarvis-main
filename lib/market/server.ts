@@ -7,8 +7,6 @@ const cleanSymbol = (symbol: string) => symbol.toUpperCase().replace(/[^A-Z.-]/g
 
 export function selectedProvider(): { name: string; kind: FeedKind } {
   if (process.env.ALPACA_API_KEY && process.env.ALPACA_API_SECRET) return { name: "Alpaca IEX", kind: "live" }
-  if (process.env.POLYGON_API_KEY) return { name: "Polygon", kind: "live" }
-  if (process.env.FINNHUB_API_KEY) return { name: "Finnhub", kind: "live" }
   if (process.env.MARKET_DATA_MODE === "yahoo") return { name: "Yahoo Finance", kind: "delayed" }
   return { name: "Jarvis demo stream", kind: "mock" }
 }
