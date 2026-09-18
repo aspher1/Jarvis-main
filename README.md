@@ -18,7 +18,7 @@ Chrome warns that the extension can read page content because the required Unive
 1. After **Load unpacked**, open a public `https://www.tradingview.com/chart/` chart and reload once.
 2. Expect one right-edge Jarvis dock plus arrowed **BUY ZONE**, **TAKE PROFIT**, and **GET OUT** labels with mono prices.
 3. Confirm **Practice money (Paper)** and **MOCK · demo prices** are both visible. This is the fixture path, not live Algos output.
-4. Open **Why** to see quality, invalidation, bias, and reward:risk; close it to restore Beginner view.
+4. Open **Why** (collapsed by default) to see quality, invalidation, bias, and reward:risk; close it to restore Beginner view. R never appears on the surface.
 5. Press backtick to hide/restore Jarvis, then drag the chart through a label to confirm the chart still receives pointer input.
 6. Open an ordinary page with no recognized chart mount to verify the **Universal dock** appears without chart ESP.
 
@@ -54,6 +54,7 @@ There is no LLM-per-tick path or timer batching. Until the stream bridge lands, 
 - The optional Jarvis Chat toggle is off by default and identified as **AI helper (paid · limited uses)**. This spike does not connect to a paid service.
 - On-chart labels lead with kid-clear actions: **→ BUY ZONE** (“Buy here”), **↑ TAKE PROFIT** (“Take some money off”), and **↓ GET OUT** (“Leave if price hits here”), each paired with the exact mono plan price.
 - Optional bias, invalidation, reward:risk, and setup name are confined to a collapsed **Why** expander. Quality is always shown as Strong, Okay, or Skip when a plan is active.
+- Overlay dock craft follows Invertix §0c: void/ivory/Instrument Sans/mono, hairline `white/5`, sparse glass, and `--jx-cta #FF6A2C` on **Apply Jarvis plan** only. BUY ZONE stays cyan; GET OUT stays coral.
 
 ## Files
 
@@ -61,7 +62,7 @@ There is no LLM-per-tick path or timer batching. Until the stream bridge lands, 
 - `adapters.js` — TradingView, Webull, Yahoo Finance, and Universal registry
 - `desk-plan.js` — testable exact-price and freshness contract validation
 - `content.js` — shared shadow-DOM dock, ESP, waypoints, modules, and layout
-- `docs/DESIGN.md` — locked Design SoT v0.2.4
+- `docs/DESIGN.md` — locked Design SoT v0.2.7
 - `docs/DESKPLAN.md` — canonical Risk/Algos-to-HUD rendering contract
 - `docs/DEMO.md` — multi-host screenshot and interaction checklist
 

@@ -143,5 +143,24 @@ const content = fs.readFileSync("content.js", "utf8");
 assert.equal(content.includes("MOCK · demo prices"), true);
 assert.equal(content.includes("Delayed / MOCK"), false);
 assert.equal(content.includes("Delayed · ~15m"), false);
+assert.equal(content.includes("--jx-cta: #FF6A2C"), true);
+assert.equal(content.includes("Instrument Sans"), true);
+assert.equal(content.includes("Apply Jarvis plan"), true);
+assert.equal(content.includes('details class="why-panel"'), true);
+assert.equal(content.includes("why-panel is-hidden"), false);
+assert.equal(content.includes("<details class=\"why-panel\" open"), false);
+assert.equal(content.includes("R-multiple"), false);
+assert.equal(content.includes("--jx-buy: #00D4AA"), true);
+assert.equal(content.includes("--jx-stop: #FF4757"), true);
+assert.match(content, /hudLabel: "BUY ZONE"[\s\S]*color: "#00D4AA"/);
+assert.match(content, /hudLabel: "GET OUT"[\s\S]*color: "#FF4757"/);
 
-console.log("Manifest, adapters, DeskPlan validation, and gap safety pass");
+const adapters = fs.readFileSync("adapters.js", "utf8");
+assert.equal(adapters.includes("rgba(5, 5, 5, 0.97)"), true);
+
+const design = fs.readFileSync("docs/DESIGN.md", "utf8");
+assert.equal(design.includes("Design Spec v0.2.7"), true);
+assert.equal(design.includes("## 0c. Invertix craft tokens"), true);
+assert.equal(design.includes("O-P0-04"), true);
+
+console.log("Manifest, adapters, DeskPlan validation, Invertix craft, and gap safety pass");

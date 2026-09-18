@@ -1,8 +1,9 @@
-# Jarvis — Design Spec v0.2.4 (SoT)
+# Jarvis — Design Spec v0.2.7 (SoT)
 
-**Owner:** VP of Design · **Report to:** COO only · **Do not merge**  
-**Repo:** https://github.com/aspher1/Jarvis-main  
-**Comps:** `/workspace/jarvis-design/RESEARCH-HUD-COMPS.md`, `/workspace/jarvis-design/COMPS.md`
+**Owner:** VP of Design · **Report to:** COO only · **Do not merge**
+**Repo:** https://github.com/aspher1/Jarvis-main
+**Comps:** `/workspace/jarvis-design/INVERTIX-COMPS.md` (UI Research live tokens), `/workspace/jarvis-design/invertix-shots/`, `/workspace/jarvis-design/RESEARCH-HUD-COMPS.md`, `/workspace/jarvis-design/COMPS.md`
+**Craft bar:** Invertix-grade premium dark AI-agent OS (https://www.invertix.ai/) — Randy/COO lock
 
 ---
 
@@ -105,6 +106,49 @@ Coach / first-run: floating tip, dismissible, **never** blocks the chart.
 
 ---
 
+## 0c. Invertix craft tokens (P0 — locked)
+
+Live bar is invertix.ai (void field, ivory type, Instrument Sans, sparse glass, hairline white/5, orange reserved for the money click). Overlay dock, badges, and waypoint plates use these tokens. **Do not** restyle the host page.
+
+### Shared `--jx-*` tokens (C-P0-01)
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `--jx-void` | `#050505` | Dock field / deepest plate |
+| `--jx-panel` | `#141414` | Raised rows, badge wells |
+| `--jx-ivory` | `#F5EFE6` | Primary type |
+| `--jx-ivory-muted` | `#EBDCB3` | Secondary type |
+| `--jx-hairline` | `rgba(255,255,255,0.05)` | 1px borders (white/5) |
+| `--jx-glass` | `rgba(5,5,5,0.64)` + `blur(14px)` | Sparse dock glass (12–16px) |
+| `--jx-cta` | `#FF6A2C` | **Apply Jarvis plan** / **Place** only |
+| `--jx-buy` | `#00D4AA` | BUY ZONE / entry / ice cyan |
+| `--jx-stop` | `#FF4757` | GET OUT / stop / coral |
+| `--jx-active` | `#A6FF4D` | Sparse module-ON pulse |
+| `--jx-warning` | `#FFB800` | Delayed / weak plan |
+
+**Type:** Instrument Sans for labels / plain English. Roboto Mono (JetBrains Mono fallback) + `tnum` for prices, qty, lag. `font-feature-settings: "ss01", "ss02"` on editorial type.
+
+**CTA rule:** `--jx-cta` is the money click. Hide / collapse / toggles stay ivory-on-void hairline. Never paint BUY ZONE, TAKE PROFIT, GET OUT, or module-ON in orange.
+
+**Anti-goals (still locked):** purple SaaS · Inter-on-#0D0D0D terminal leftovers · neon glass soup · opaque full-bleed HUD · orange waypoint soup.
+
+### Overlay dock IDs (from INVERTIX-GAP-P0 — O-P0 this spike)
+
+| ID | Surface | Requirement |
+|----|---------|-------------|
+| **C-P0-01** | Shared tokens | Overlay and cockpit speak `--jx-*`; void / ivory / Instrument Sans / mono |
+| **O-P0-01** | Overlay dock | Void field + ivory type + Instrument Sans on brand, badges, modules, copy |
+| **O-P0-02** | Overlay dock / plates | Hairline `white/5` only — no `#2A2A2A` SaaS hairline |
+| **O-P0-03** | Overlay dock | Sparse glass (`blur` 12–16px, ≤64% void). Not frosted soup, not opaque slab |
+| **O-P0-04** | Overlay CTA | `--jx-cta #FF6A2C` on **Apply Jarvis plan** (and **Place** if present). No other chrome |
+| **O-P0-05** | Waypoints / ESP | BUY ZONE ice cyan `#00D4AA`; GET OUT coral `#FF4757`; TAKE PROFIT cyan/lime. Orange never |
+| **O-P0-06** | Why / R | **Why** expander present and **collapsed** in Beginner. R, bias, setup name off the surface |
+| **O-P0-07** | Yahoo / light hosts | Stronger void scrim + hairline plate on waypoint labels (adapter contrast only) |
+
+Cockpit C-P0 rows beyond shared tokens are owned by the standalone app, not this overlay spike.
+
+---
+
 ## 1. Visual system
 
 ### 1a. Host pages — do not restyle
@@ -113,15 +157,17 @@ Leave host chrome alone (TV / Webull / Yahoo). Jarvis draws *on top* via extensi
 
 ### 1b. Standalone cockpit base (secondary)
 
-- Dark-only: `#0D0D0D` / `#141414`, hairline `#2A2A2A`, square corners, shared borders
-- Chart hero; flat fills; desktop 1280+
+- Invertix void `#050505` / panel `#141414`, hairline `white/5`, square corners
+- Chart hero; sparse glass on chrome only; desktop 1280+
+- Same `--jx-*` tokens as the overlay dock
 
 ### 1c. Mod overlay (both surfaces)
 
-- Cyan/teal `#00D4AA` = buy / ENTRY / T1–T2
+- Cyan/teal `#00D4AA` = buy / BUY ZONE / T1
 - Lime `#A6FF4D` = active module / beacon pulse (sparse)
-- Coral `#FF4757` = STOP / loss / live armed
+- Coral `#FF4757` = GET OUT / STOP / loss / live armed
 - Amber `#FFB800` = warning / delayed / weak plan
+- Orange `#FF6A2C` = Apply / Place **only**
 - ESP box ≤8% fill; waypoint beacons with outline/scrim; tracer lines price → levels
 - Module row: ON glow + **plain-English subtitle**
 
@@ -133,9 +179,9 @@ Leave host chrome alone (TV / Webull / Yahoo). Jarvis draws *on top* via extensi
 
 | Use | Face | Notes |
 |-----|------|-------|
-| Prices, qty, levels, lag | JetBrains Mono / IBM Plex Mono + `tnum` | Numbers only |
-| Labels / plain English | Inter | Micro labels 10–12px OK |
-| Beginner decision card | Larger | **BUY ZONE · TAKE PROFIT · GET OUT** · Shares |
+| Prices, qty, levels, lag | Roboto Mono / JetBrains Mono / IBM Plex Mono + `tnum` | Numbers only |
+| Labels / plain English | Instrument Sans | Micro labels 10–12px OK; `ss01` / `ss02` |
+| Beginner decision card | Larger Instrument Sans | **BUY ZONE · TAKE PROFIT · GET OUT** · Shares |
 
 Color never alone — pair with BUY/SELL or ▲/▼.
 
@@ -152,7 +198,7 @@ Color never alone — pair with BUY/SELL or ▲/▼.
 | Paid LLM | AI helper (paid · limited uses) | Opt-in; show remaining uses |
 | Paper | Practice money (Paper) | — |
 | Live | Real money (Live) | Typed confirm required |
-| Feed | Prices: Live · Xms / Delayed · ~15m / POLLING (slower) | — |
+| Feed | Prices: Live · Xms / Delayed · ~15m / POLLING (slower) | MOCK · demo prices when no live stream |
 
 Finger/arrow cues on every active BUY ZONE / TAKE PROFIT / GET OUT.
 Jargon (`T1`, `STOP`, `R-multiple`) = secondary micro-text in Pro only, or Details.
@@ -166,8 +212,8 @@ Plan checklist: (1) Check BUY ZONE (2) Set GET OUT (3) Place order
 
 | Surface | Primary CTA | Notes |
 |---------|-------------|-------|
-| **Host extension** (TV / Webull / Yahoo / Universal) | **Apply Jarvis plan** → order path in panel or deep-link standalone | Hide Jarvis hotkey; host badge visible |
-| Standalone `/trade/[symbol]` | Apply plan → Place PAPER/LIVE | Secondary; same tokens |
+| **Host extension** (TV / Webull / Yahoo / Universal) | **Apply Jarvis plan** (`--jx-cta`) → order path in panel or deep-link standalone | Hide Jarvis hotkey; host badge visible |
+| Standalone `/trade/[symbol]` | Apply plan → Place PAPER/LIVE (`--jx-cta` on Apply/Place only) | Secondary; same tokens |
 | Blotter / Settings / How it works | as before | Prefer standalone for dense settings |
 
 Beginner modules default ON: ESP Levels · Waypoint Targets · Risk Calc · Jarvis Chat. Algo Radar / Copy Aura quieter.
@@ -179,6 +225,7 @@ Beginner modules default ON: ESP Levels · Waypoint Targets · Risk Calc · Jarv
 - **Not financial advice. Trading can lose money including your full account.**
 - Plan quality: Strong / Okay / Skip
 - Forbidden: “guaranteed”, “get rich”, “always wins”, “risk-free”
+- R / bias never on the default surface — **Why** only, collapsed
 
 ---
 
@@ -190,10 +237,11 @@ PASS if a non-trader answers in <10s on a **host page with overlay:**
 
 1. **BUY ZONE / TAKE PROFIT / GET OUT** visible on chart (finger/arrow cues)
 2. Paper vs Live
-3. Live vs Delayed prices
+3. Live vs Delayed prices (MOCK ≠ Delayed)
 4. Can hide Jarvis in one click/hotkey without reloading the host
 5. Chart still pan/zoomable (non-blocking)
 6. Correct host badge; Universal dock still usable if chart mount fails
+7. Dock reads Invertix: void/ivory/Instrument Sans, hairline white/5, sparse glass, orange **Apply** only
 
 Secondary: standalone cockpit shots matching the same language.
 
@@ -221,7 +269,8 @@ Secondary: standalone cockpit shots matching the same language.
 6. Paper→Live confirm + $-loss language
 7. Alert states Active / Triggered / Paused / Expired
 8. No fill confetti
+9. Invertix dock craft (void / ivory / glass / `--jx-cta`) on overlay + cockpit
 
 ---
 
-*Jarvis Design Spec v0.2.4 · 2026-09-18 · VP of Design · dual-layer surface + Why expander; exact level placement*
+*Jarvis Design Spec v0.2.7 · 2026-09-18 · VP of Design · Invertix §0c overlay tokens + Why collapsed; exact level placement*

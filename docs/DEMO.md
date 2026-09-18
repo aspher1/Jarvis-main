@@ -9,7 +9,7 @@ Use a desktop viewport at least 1280px wide. Current screenshots exercise the sc
 - Open a public TradingView Superchart.
 - Confirm the badge reads **on TradingView**.
 - Capture the right-edge dock plus → BUY ZONE, ↑ TAKE PROFIT, and ↓ GET OUT chart labels with the fixture’s unrounded numeric values in mono type.
-- Expand **Why** once to capture invalidation/quality, then collapse it for the Beginner-default shot.
+- Expand **Why** once to capture invalidation/quality, then collapse it for the Beginner-default shot. Reward:risk must not appear until Why is open.
 - Drag/pan the chart starting beneath a tracer or label to demonstrate that the graphics layer does not receive pointer events.
 - Click **Hide ESP**, then restore it. Press backtick to hide and restore all Jarvis UI.
 

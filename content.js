@@ -214,9 +214,20 @@
     };
   }
 
+  function ensureInvertixFonts() {
+    if (document.getElementById("jarvis-invertix-fonts")) return;
+    const link = document.createElement("link");
+    link.id = "jarvis-invertix-fonts";
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap";
+    document.documentElement.appendChild(link);
+  }
+
   function createHud() {
     if (document.getElementById(HOST_ID)) return;
 
+    ensureInvertixFonts();
     host = document.createElement("div");
     host.id = HOST_ID;
     host.setAttribute("data-jarvis-extension", "true");
@@ -227,16 +238,30 @@
       :host {
         all: initial;
         color-scheme: dark;
-        --jarvis-entry: #00D4AA;
-        --jarvis-stop: #FF4757;
-        --jarvis-active: #A6FF4D;
-        --jarvis-warning: #FFB800;
-        --jarvis-bg: #0D0D0D;
-        --jarvis-panel: #141414;
-        --jarvis-border: #2A2A2A;
-        --jarvis-label-bg: rgba(13, 13, 13, 0.94);
-        --jarvis-label-border: #59606B;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --jx-void: #050505;
+        --jx-panel: #141414;
+        --jx-ivory: #F5EFE6;
+        --jx-ivory-muted: #EBDCB3;
+        --jx-hairline: rgba(255, 255, 255, 0.05);
+        --jx-glass: rgba(5, 5, 5, 0.64);
+        --jx-cta: #FF6A2C;
+        --jx-buy: #00D4AA;
+        --jx-stop: #FF4757;
+        --jx-active: #A6FF4D;
+        --jx-warning: #FFB800;
+        --jarvis-entry: var(--jx-buy);
+        --jarvis-stop: var(--jx-stop);
+        --jarvis-active: var(--jx-active);
+        --jarvis-warning: var(--jx-warning);
+        --jarvis-bg: var(--jx-void);
+        --jarvis-panel: var(--jx-panel);
+        --jarvis-border: var(--jx-hairline);
+        --jarvis-label-bg: rgba(5, 5, 5, 0.92);
+        --jarvis-label-border: rgba(255, 255, 255, 0.18);
+        --jx-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+        --jx-mono: "Roboto Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+        font-family: var(--jx-sans);
+        font-feature-settings: "ss01", "ss02";
       }
 
       *, *::before, *::after { box-sizing: border-box; }
@@ -294,7 +319,7 @@
         height: 17px;
         border: 1px solid currentColor;
         transform: rotate(45deg);
-        background: rgba(13, 13, 13, 0.75);
+        background: rgba(5, 5, 5, 0.78);
       }
 
       .beacon::after {
@@ -314,30 +339,37 @@
         gap: 1px 8px;
         min-width: 146px;
         padding: 5px 7px;
-        color: #F5F7FA;
+        color: var(--jx-ivory);
         background: var(--jarvis-label-bg);
-        border: 1px solid currentColor;
-        border-left-width: 3px;
-        font: 600 10px/1.25 "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
-        font-variant-numeric: tabular-nums;
+        border: 1px solid var(--jx-hairline);
+        border-left: 2px solid currentColor;
+        font: 600 10px/1.25 var(--jx-sans);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
       }
 
       .waypoint-label strong { color: var(--waypoint-color); letter-spacing: .04em; }
-      .waypoint-label .price { text-align: right; }
+      .waypoint-label .price {
+        text-align: right;
+        font-family: var(--jx-mono);
+        font-variant-numeric: tabular-nums;
+      }
       .waypoint-label small {
         grid-column: 1 / -1;
-        color: #C3C7CF;
-        font: 500 9px/1.25 Inter, ui-sans-serif, system-ui, sans-serif;
+        color: var(--jx-ivory-muted);
+        font: 500 9px/1.25 var(--jx-sans);
       }
 
       .dock {
         position: fixed;
         z-index: 799;
         width: 278px;
-        color: #E7EAF0;
-        background: var(--jarvis-bg);
-        border: 1px solid var(--jarvis-border);
-        box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+        color: var(--jx-ivory);
+        background: var(--jx-glass);
+        border: 1px solid var(--jx-hairline);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         pointer-events: auto;
       }
 
@@ -379,23 +411,23 @@
         width: 19px;
         height: 19px;
         flex: 0 0 auto;
-        color: var(--jarvis-active);
-        border: 1px solid var(--jarvis-active);
-        font: 800 10px/1 ui-monospace, monospace;
+        color: var(--jx-ivory);
+        border: 1px solid var(--jx-hairline);
+        font: 700 10px/1 var(--jx-mono);
       }
 
       .brand-copy strong {
         display: block;
-        color: #F7F8FA;
-        font: 700 11px/1.1 Inter, ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: .13em;
+        color: var(--jx-ivory);
+        font: 650 11px/1.1 var(--jx-sans);
+        letter-spacing: .12em;
       }
 
       .brand-copy span {
         display: block;
         margin-top: 2px;
-        color: #828895;
-        font: 500 9px/1.1 Inter, ui-sans-serif, system-ui, sans-serif;
+        color: var(--jx-ivory-muted);
+        font: 500 9px/1.1 var(--jx-sans);
       }
 
       .brand-copy .host-badge {
@@ -407,16 +439,16 @@
         height: 27px;
         flex: 0 0 auto;
         padding: 0;
-        color: #C3C7CF;
-        background: #151515;
-        border: 1px solid #353535;
+        color: var(--jx-ivory-muted);
+        background: transparent;
+        border: 1px solid var(--jx-hairline);
         cursor: pointer;
       }
 
       .icon-button:hover,
       .icon-button:focus-visible {
-        color: #FFF;
-        border-color: #747984;
+        color: var(--jx-ivory);
+        border-color: rgba(255, 255, 255, 0.18);
         outline: none;
       }
 
@@ -431,13 +463,13 @@
       .badge {
         min-height: 31px;
         padding: 5px 6px;
-        background: #151515;
-        border: 1px solid #303030;
+        background: rgba(20, 20, 20, 0.55);
+        border: 1px solid var(--jx-hairline);
       }
 
       .badge span {
         display: block;
-        color: #858B96;
+        color: var(--jx-ivory-muted);
         font-size: 8px;
         line-height: 1.1;
         letter-spacing: .08em;
@@ -447,8 +479,9 @@
       .badge strong {
         display: block;
         margin-top: 3px;
-        color: #E8EAEE;
-        font: 700 9px/1.1 "JetBrains Mono", ui-monospace, monospace;
+        color: var(--jx-ivory);
+        font: 650 9px/1.1 var(--jx-mono);
+        font-variant-numeric: tabular-nums;
       }
 
       .badge.paper strong { color: var(--jarvis-entry); }
@@ -464,8 +497,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 8px 9px 5px;
-        color: #858B96;
-        font: 700 8px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+        color: var(--jx-ivory-muted);
+        font: 650 8px/1 var(--jx-sans);
         letter-spacing: .12em;
         text-transform: uppercase;
       }
@@ -491,25 +524,26 @@
       .level:last-child { border-bottom: 0; }
       .level-key {
         color: var(--level-color);
-        font: 800 9px/1 ui-monospace, monospace;
+        font: 700 9px/1 var(--jx-mono);
         letter-spacing: .04em;
       }
       .level-copy strong {
         display: block;
-        color: #E4E6EA;
+        color: var(--jx-ivory);
         font-size: 10px;
         line-height: 1.15;
       }
       .level-copy span {
         display: block;
         margin-top: 2px;
-        color: #858B96;
+        color: var(--jx-ivory-muted);
         font-size: 8px;
         line-height: 1.15;
       }
       .level-price {
-        color: #F5F6F8;
-        font: 650 10px/1 ui-monospace, monospace;
+        color: var(--jx-ivory);
+        font: 650 10px/1 var(--jx-mono);
+        font-variant-numeric: tabular-nums;
       }
 
       .gap-state {
@@ -521,26 +555,27 @@
 
       .why-panel {
         margin: 7px 8px 0;
-        color: #AFB4BD;
-        background: #151515;
-        border: 1px solid var(--jarvis-border);
+        color: var(--jx-ivory-muted);
+        background: rgba(20, 20, 20, 0.45);
+        border: 1px solid var(--jx-hairline);
         font-size: 9px;
         line-height: 1.4;
       }
 
       .why-panel summary {
         padding: 7px;
-        color: #E4E6EA;
+        color: var(--jx-ivory);
         cursor: pointer;
+        font-family: var(--jx-sans);
       }
 
       .why-content {
         padding: 0 7px 7px;
-        border-top: 1px solid var(--jarvis-border);
+        border-top: 1px solid var(--jx-hairline);
       }
 
       .why-content p { margin: 6px 0 0; }
-      .why-content strong { color: #F4F5F7; }
+      .why-content strong { color: var(--jx-ivory); }
 
       .modules {
         margin: 0 8px;
@@ -558,17 +593,17 @@
       }
 
       .module:last-child { border-bottom: 0; }
-      .module:hover { background: #181818; }
+      .module:hover { background: rgba(255, 255, 255, 0.03); }
       .module strong {
         display: block;
-        color: #E4E6EA;
+        color: var(--jx-ivory);
         font-size: 10px;
         line-height: 1.15;
       }
       .module span {
         display: block;
         margin-top: 3px;
-        color: #858B96;
+        color: var(--jx-ivory-muted);
         font-size: 8px;
         line-height: 1.2;
       }
@@ -579,8 +614,8 @@
         height: 16px;
         margin-top: 3px;
         padding: 0;
-        border: 1px solid #454545;
-        background: #202020;
+        border: 1px solid var(--jx-hairline);
+        background: rgba(20, 20, 20, 0.7);
         cursor: pointer;
       }
       .toggle::after {
@@ -590,7 +625,7 @@
         left: 3px;
         width: 8px;
         height: 8px;
-        background: #747984;
+        background: var(--jx-ivory-muted);
       }
       .toggle[aria-checked="true"] {
         border-color: var(--jarvis-active);
@@ -606,20 +641,39 @@
       .risk-note {
         margin: 7px 8px 0;
         padding: 7px;
-        color: #AFB4BD;
-        background: #151515;
-        border-left: 2px solid var(--jarvis-entry);
+        color: var(--jx-ivory-muted);
+        background: rgba(20, 20, 20, 0.45);
+        border-left: 2px solid var(--jx-buy);
         font-size: 9px;
         line-height: 1.35;
+      }
+
+      .cta-button {
+        display: block;
+        width: calc(100% - 16px);
+        min-height: 32px;
+        margin: 8px 8px 0;
+        color: #1A0A04;
+        background: var(--jx-cta);
+        border: 1px solid var(--jx-cta);
+        font: 650 11px/1 var(--jx-sans);
+        letter-spacing: .04em;
+        cursor: pointer;
+      }
+      .cta-button:hover,
+      .cta-button:focus-visible {
+        filter: brightness(1.06);
+        outline: 1px solid var(--jx-ivory);
+        outline-offset: 2px;
       }
 
       .hide-button {
         width: calc(100% - 16px);
         min-height: 29px;
         margin: 7px 8px 0;
-        color: #C8CCD3;
-        background: #151515;
-        border: 1px solid #353535;
+        color: var(--jx-ivory-muted);
+        background: transparent;
+        border: 1px solid var(--jx-hairline);
         font-size: 9px;
         cursor: pointer;
       }
@@ -637,14 +691,14 @@
       }
       .hide-button:hover,
       .hide-button:focus-visible {
-        color: #FFF;
-        border-color: #747984;
+        color: var(--jx-ivory);
+        border-color: rgba(255, 255, 255, 0.18);
         outline: none;
       }
 
       .disclaimer {
         margin: 8px;
-        color: #858B96;
+        color: var(--jx-ivory-muted);
         font-size: 8px;
         line-height: 1.35;
       }
@@ -676,7 +730,7 @@
         <div class="waypoints"></div>
       </div>
 
-      <aside class="dock" aria-label="Jarvis paper-trading HUD">
+      <aside class="dock" aria-label="Jarvis paper-trading HUD" data-spec="O-P0-01 O-P0-02 O-P0-03">
         <header class="dock-header">
           <div class="brand">
             <div class="brand-mark" aria-hidden="true">J</div>
@@ -730,16 +784,17 @@
             </label>
           </div>
 
-          <details class="why-panel is-hidden">
+          <details class="why-panel" data-spec="O-P0-06">
             <summary>Why <span aria-hidden="true">▸</span> <small>Pro desk</small></summary>
             <div class="why-content"></div>
           </details>
+          <button class="cta-button apply-button" type="button" data-spec="O-P0-04">Apply Jarvis plan</button>
           <div class="control-row">
             <button class="hide-button overlay-button" type="button">Hide ESP</button>
             <button class="hide-button jarvis-button" type="button" title="Press the backtick key to show Jarvis again">Hide Jarvis · hotkey</button>
           </div>
           <p class="disclaimer">Not financial advice. Trading can lose money, including your full account.</p>
-          <p class="delayed-warning">Based on delayed prices — do not use for live day trades.</p>
+          <p class="delayed-warning">Mock dock only — chart ESP is off until an exact live stream arrives.</p>
         </div>
       </aside>
     `;
@@ -763,8 +818,10 @@
     const delayedWarning = shadow.querySelector(".delayed-warning");
     const whyPanel = shadow.querySelector(".why-panel");
     const whyContent = shadow.querySelector(".why-content");
-    const whyWasOpen = whyPanel.open;
+    const whyWasOpen = Boolean(whyPanel.open);
     list.replaceChildren();
+    whyPanel.classList.remove("is-hidden");
+    whyPanel.open = false;
     container.replaceChildren();
     tracers.replaceChildren();
     whyContent.replaceChildren();
@@ -858,7 +915,6 @@
       delayedWarning.textContent =
         "Mock dock only — chart ESP is off until an exact live stream arrives.";
       delayedWarning.classList.remove("is-hidden");
-      whyPanel.classList.toggle("is-hidden", !preferences.risk);
       whyPanel.open = whyWasOpen;
       renderWhy(MOCK_DESK_PLAN);
       return;
@@ -881,7 +937,6 @@
       "is-hidden",
       feedStatus !== "delayed",
     );
-    whyPanel.classList.toggle("is-hidden", !preferences.risk);
     whyPanel.open = whyWasOpen;
 
     renderWhy(activeEnvelope.plan);
@@ -918,6 +973,12 @@
 
     shadow.querySelector(".jarvis-button").addEventListener("click", () => {
       setJarvisVisibility(false);
+    });
+
+    shadow.querySelector(".apply-button").addEventListener("click", () => {
+      const button = shadow.querySelector(".apply-button");
+      button.textContent = "Applied · PAPER only";
+      shadow.querySelector(".level-list")?.scrollIntoView({ block: "nearest" });
     });
   }
 
@@ -990,12 +1051,7 @@
     shadow
       .querySelector(".waypoints")
       .classList.toggle("is-hidden", !preferences.waypoints);
-    shadow
-      .querySelector(".why-panel")
-      .classList.toggle(
-        "is-hidden",
-        !preferences.risk || !activeEnvelope,
-      );
+    shadow.querySelector(".why-panel").classList.remove("is-hidden");
 
     const hideButton = shadow.querySelector(".overlay-button");
     hideButton.textContent = preferences.overlaysVisible

@@ -14,8 +14,8 @@
         "canvas",
       ],
       contrast: {
-        labelBackground: "rgba(13, 13, 13, 0.94)",
-        labelBorder: "#59606B",
+        labelBackground: "rgba(5, 5, 5, 0.92)",
+        labelBorder: "rgba(255, 255, 255, 0.18)",
       },
     },
     {
@@ -30,8 +30,8 @@
         "canvas",
       ],
       contrast: {
-        labelBackground: "rgba(10, 17, 24, 0.96)",
-        labelBorder: "#65717D",
+        labelBackground: "rgba(5, 5, 5, 0.94)",
+        labelBorder: "rgba(255, 255, 255, 0.22)",
       },
     },
     {
@@ -48,8 +48,8 @@
         "canvas",
       ],
       contrast: {
-        labelBackground: "rgba(13, 13, 13, 0.97)",
-        labelBorder: "#FFFFFF",
+        labelBackground: "rgba(5, 5, 5, 0.97)",
+        labelBorder: "rgba(255, 255, 255, 0.55)",
       },
     },
   ];
@@ -60,8 +60,8 @@
     hostnames: [],
     chartSelectors: [],
     contrast: {
-      labelBackground: "rgba(13, 13, 13, 0.97)",
-      labelBorder: "#59606B",
+      labelBackground: "rgba(5, 5, 5, 0.94)",
+      labelBorder: "rgba(255, 255, 255, 0.18)",
     },
   };
 
