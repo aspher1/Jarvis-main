@@ -108,7 +108,9 @@ export function Cockpit({ symbol }: { symbol: string }) {
           {error ? <span className="text-[10px] uppercase text-[#ff4757]">{error}</span> : null}
         </div>
         <div className="ml-auto flex items-center gap-4">
-          <span className="border border-[#00d4aa] px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#00d4aa]">Analysis: FREE local</span>
+          <span className={`border px-2 py-1 text-[9px] font-bold uppercase tracking-wider ${quote?.feed === "live" ? "border-[#00d4aa] text-[#00d4aa]" : "border-[#ffb800] text-[#ffb800]"}`}>
+            {quote?.feed === "live" ? "LIVE analysis · FREE local" : quote?.feed === "delayed" ? "DELAYED analysis · FREE local" : "DEMO analysis · FREE local"}
+          </span>
           <span className="micro">Same stream → chart + last price</span>
           <span className="flex items-center gap-2 text-[10px] font-bold uppercase text-[#00d4aa]"><Radio className="size-3" /> Stream connected</span>
         </div>
@@ -178,6 +180,18 @@ export function Cockpit({ symbol }: { symbol: string }) {
                 <details className="border-x border-b border-[#2a2a2a] p-3">
                   <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] font-semibold text-[#aaa]">Why this plan? <ChevronDown className="size-3" /></summary>
                   <p className="mt-2 text-[11px] leading-5 text-[#888]">{assistant.explain(displayPlan)}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-px bg-[#2a2a2a]">
+                    {[
+                      ["Desk bias", displayPlan.desk.bias],
+                      ["VWAP", number(displayPlan.desk.vwap)],
+                      ["Prior high / low", `${number(displayPlan.desk.priorHigh)} / ${number(displayPlan.desk.priorLow)}`],
+                      ["Opening range", `${number(displayPlan.desk.openingRangeLow)}–${number(displayPlan.desk.openingRangeHigh)}`],
+                    ].map(([label, value]) => (
+                      <div key={label} className="bg-[#111] p-2"><span className="micro block">{label}</span><span className="mono mt-1 block text-[10px] text-[#ccc]">{value}</span></div>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-[10px] leading-4 text-[#777]"><strong className="text-[#ffb800]">Catalyst check:</strong> {displayPlan.desk.catalystWindow}</p>
+                  <p className="mt-1 text-[10px] leading-4 text-[#777]"><strong className="text-[#00d4aa]">Risk desk:</strong> {displayPlan.desk.hedgeNote}</p>
                 </details>
                 {displayPlan.feedWarning ? <p className="mt-2 border border-[#ffb800] p-2 text-[10px] leading-4 text-[#ffcc45]">{displayPlan.feedWarning}</p> : null}
                 <ol className="mt-3 grid grid-cols-3 gap-px bg-[#2a2a2a]">
