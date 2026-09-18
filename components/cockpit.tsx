@@ -108,6 +108,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
           {error ? <span className="text-[10px] uppercase text-[#ff4757]">{error}</span> : null}
         </div>
         <div className="ml-auto flex items-center gap-4">
+          <span className="border border-[#00d4aa] px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#00d4aa]">Analysis: FREE local</span>
           <span className="micro">Same stream → chart + last price</span>
           <span className="flex items-center gap-2 text-[10px] font-bold uppercase text-[#00d4aa]"><Radio className="size-3" /> Stream connected</span>
         </div>
@@ -150,7 +151,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
         <aside className="row-span-2 border-y border-r border-[#2a2a2a] bg-[#121212]">
           <div className="panel-title">
             <span className="flex items-center gap-2 micro !text-[#cfcfcf]"><Bot className="size-3 text-[#00d4aa]" /> Jarvis assistant</span>
-            <span className="micro !text-[#00d4aa]">Local planner</span>
+            <span className="micro !text-[#00d4aa]">FREE · No AI bill</span>
           </div>
           <div className="border-b border-[#2a2a2a] p-3">
             <div className="border-l-2 border-[#00d4aa] bg-[#101a18] p-3 text-xs leading-5 text-[#d4d4d4]">{notice}</div>
@@ -209,7 +210,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
             <input className="h-11 min-w-0 flex-1 bg-[#0d0d0d] px-3 text-xs text-white outline-none" value={message} onChange={(event) => setMessage(event.target.value)} aria-label="Ask Jarvis" />
             <Button type="submit" variant="primary" className="h-11" disabled={busy}><Send className="size-3.5" /> Ask</Button>
           </form>
-          <p className="p-3 text-[10px] leading-4 text-[#666]">Not financial advice. You are responsible for orders. Trading can lose money, including your full account.</p>
+          <p className="p-3 text-[10px] leading-4 text-[#777]">Not financial advice. This is a plan helper — profits are never guaranteed. Trading can lose money, including your full account.</p>
         </aside>
 
         <section className="col-span-2 grid grid-cols-[1fr_1fr] border-x border-b border-[#2a2a2a] bg-[#141414]">

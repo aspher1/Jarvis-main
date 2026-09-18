@@ -60,10 +60,10 @@ export function ChartHud({ candles, quote, plan, modules }: {
   }, [candles])
 
   const levels = useMemo(() => plan && candles.length ? [
-    { key: "target2", label: "T2 · TAKE MORE PROFIT", value: plan.target2, color: "#a6ff4d" },
-    { key: "target1", label: "T1 · TAKE SOME PROFIT", value: plan.target1, color: "#00d4aa" },
-    { key: "entry", label: "ENTRY · BUY HERE", value: plan.entry, color: "#00d4aa" },
-    { key: "stop", label: "STOP · GET OUT IF WRONG", value: plan.stop, color: "#ff4757" },
+    { key: "target2", label: "T2 · TAKE PROFIT — HERE", value: plan.target2, color: "#a6ff4d" },
+    { key: "target1", label: "T1 · TAKE PROFIT — HERE", value: plan.target1, color: "#00d4aa" },
+    { key: "entry", label: "BUY ZONE — HERE", value: plan.entry, color: "#00d4aa" },
+    { key: "stop", label: "GET OUT IF WRONG — HERE", value: plan.stop, color: "#ff4757" },
   ].map((level) => ({ ...level, top: levelPosition(level.value, candles) })) : [], [candles, plan])
 
   return (
@@ -88,12 +88,12 @@ export function ChartHud({ candles, quote, plan, modules }: {
               height: `${Math.max(14, Math.abs(plan.entry - plan.stop) * 12)}px`,
             }}
           >
-            <span className="absolute -left-px -top-6 border border-[#00d4aa] bg-[#08221d] px-2 py-1 font-mono text-[10px] font-bold text-[#00d4aa]">ESP BOX · ENTRY ZONE</span>
+            <span className="absolute -left-px -top-7 border border-[#00d4aa] bg-[#08221d] px-3 py-1.5 font-mono text-xs font-bold text-[#00d4aa]">BUY ZONE — HERE →</span>
           </div>
           {levels.map((level) => (
             <div key={level.key} className="absolute left-[15%] right-[3%] border-t" style={{ top: `${level.top}%`, borderColor: level.color }}>
-              <div className="absolute -right-px -top-[14px] flex h-7 items-center gap-3 border px-2 font-mono text-[10px] font-bold" style={{ color: level.color, borderColor: level.color, background: "#0d0f0f" }}>
-                <span>{level.label}</span>
+              <div className="absolute -right-px -top-[16px] flex h-8 items-center gap-3 border px-3 font-mono text-[11px] font-bold" style={{ color: level.color, borderColor: level.color, background: "#0d0f0f" }}>
+                <span>◀ {level.label}</span>
                 <span>{number(level.value)}</span>
               </div>
               <span className="absolute left-0 top-1 font-mono text-[9px]" style={{ color: level.color }}>WAYPOINT // {level.key.toUpperCase()}</span>

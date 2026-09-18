@@ -15,6 +15,8 @@ npm run dev
 
 Open `http://localhost:3000`. The default demo uses a clearly labeled mock stream, so the cockpit looks alive without credentials.
 
+Plan analysis is free and local by default. Algo rules, level detection, sizing, and plain-English templates run against the in-browser quote/candle state; no LLM is called on each tick. The `Assistant` interface can support an optional keyed model later, but model calls must be user-triggered and limited to once per changed plan.
+
 ## Market-data modes
 
 Jarvis uses one `MarketData` contract for snapshots, candles, and subscriptions:
