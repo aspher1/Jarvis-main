@@ -50,11 +50,12 @@ export interface Broker {
   flatten(symbol: string, price: number): Promise<Fill | null>
 }
 
-export function checkRisk(order: OrderRequest, rules: RiskRules, dailyPnl: number): RiskCheck {
+export function checkRisk(order: OrderRequest, rules: RiskRules, dailyPnl: number, planQuality?: "Strong" | "Okay" | "Skip"): RiskCheck {
   const riskDollars = Math.abs(order.price - order.stop) * order.shares
   const riskPercent = (riskDollars / rules.equity) * 100
   const rewardRisk = Math.abs(order.target - order.price) / Math.max(0.01, Math.abs(order.price - order.stop))
   const reasons: string[] = []
+  if (planQuality === "Skip") reasons.push("Plan quality is Skip — Place Order is blocked.")
   if (riskPercent > rules.maxRiskPercent) reasons.push(`Risk is ${riskPercent.toFixed(2)}%. Your maximum is ${rules.maxRiskPercent}%.`)
   if (rewardRisk < rules.minRewardRisk) reasons.push(`Possible reward is only ${rewardRisk.toFixed(1)}R. Minimum is ${rules.minRewardRisk}R.`)
   if (dailyPnl <= -(rules.equity * rules.dailyLossPercent) / 100) reasons.push("Daily loss limit reached. New entries are locked.")

@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react"
 import type { JarvisPlan } from "@/lib/assistant"
+import type { PlanQuality } from "@/lib/algos"
 import { checkRisk, journalMetrics, type BrokerMode, type Fill, type OrderRequest, type Position, type RiskCheck } from "@/lib/paper"
 
 type Preferences = {
@@ -35,7 +36,7 @@ type JarvisState = {
   removeSymbol: (symbol: string) => void
   updatePreferences: (update: Partial<Preferences>) => void
   applyPlan: (plan: JarvisPlan) => void
-  submitOrder: (order: OrderRequest, feedIsLive: boolean) => Promise<{ fill?: Fill; risk: RiskCheck; error?: string }>
+  submitOrder: (order: OrderRequest, feedIsLive: boolean, planQuality: PlanQuality) => Promise<{ fill?: Fill; risk: RiskCheck; error?: string }>
   flatten: (symbol: string, price: number) => void
   flattenAll: () => void
   updatePrice: (symbol: string, price: number) => void
@@ -137,7 +138,7 @@ export function JarvisProvider({ children }: { children: ReactNode }) {
       maxRiskPercent: preferences.maxRiskPercent,
       minRewardRisk: preferences.minRewardRisk,
       dailyLossPercent: preferences.dailyLossPercent,
-    }, metrics.totalPnl)
+    }, metrics.totalPnl, planQuality)
     if (!risk.allowed) return { risk, error: risk.reasons.join(" ") }
     if (consecutiveLosses >= 2) return { risk, error: "Two losses in a row. Take a 15-minute cooldown before another entry." }
 

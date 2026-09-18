@@ -65,6 +65,10 @@ export function Cockpit({ symbol }: { symbol: string }) {
       setNotice("Apply a Jarvis plan before placing an order.")
       return
     }
+    if (plan.quality === "Skip") {
+      setNotice("Plan quality is Skip — Place Order is blocked.")
+      return
+    }
     const result = await submitOrder({
       symbol,
       side: "BUY",
@@ -73,7 +77,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
       stop: plan.stop,
       target: plan.target1,
       mode: preferences.brokerMode,
-    }, quote.feed === "live")
+    }, quote.feed === "live", plan.quality)
     setNotice(result.error ?? `${preferences.brokerMode === "live" ? "LIVE" : "PAPER"} order filled in ${result.fill?.ackMs}ms.`)
   }
 
@@ -168,7 +172,7 @@ export function Cockpit({ symbol }: { symbol: string }) {
                     <Zap className="size-4" /> Apply Jarvis plan
                   </Button>
                 ) : (
-                  <Button variant="primary" size="lg" className="mt-3 w-full" onClick={() => void placeOrder()}>
+                  <Button variant="primary" size="lg" className="mt-3 w-full" disabled={plan?.quality === "Skip"} onClick={() => void placeOrder()}>
                     <Shield className="size-4" /> Place {preferences.brokerMode === "live" ? "LIVE" : "PAPER"} order
                   </Button>
                 )}
