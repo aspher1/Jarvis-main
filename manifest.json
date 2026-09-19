@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Jarvis Multi-Host HUD Spike",
+  "description": "A multi-host paper-trading waypoint HUD prototype.",
+  "version": "0.1.0",
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "adapters.js",
+        "desk-plan.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
