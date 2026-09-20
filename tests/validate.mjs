@@ -159,8 +159,10 @@ const adapters = fs.readFileSync("adapters.js", "utf8");
 assert.equal(adapters.includes("rgba(5, 5, 5, 0.97)"), true);
 
 const design = fs.readFileSync("docs/DESIGN.md", "utf8");
-assert.equal(design.includes("Design Spec v0.2.7"), true);
-assert.equal(design.includes("## 0c. Invertix craft tokens"), true);
-assert.equal(design.includes("O-P0-04"), true);
+assert.equal(design.includes("Design Spec v0.2.6"), true);
+assert.equal(design.includes("## 0c. Invertix-grade craft"), true);
+assert.equal(design.includes("--jx-void"), true);
+assert.equal(content.includes("--jx-void: #050507"), true);
+assert.equal(content.includes("blur(16px)"), true);
 
 console.log("Manifest, adapters, DeskPlan validation, Invertix craft, and gap safety pass");

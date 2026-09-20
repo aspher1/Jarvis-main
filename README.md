@@ -57,7 +57,7 @@ There is no LLM-per-tick path or timer batching. Until the stream bridge lands, 
 - The optional Jarvis Chat toggle is off by default and identified as **AI helper (paid · limited uses)**. This spike does not connect to a paid service.
 - On-chart labels lead with kid-clear actions: **→ BUY ZONE** (“Buy here”), **↑ TAKE PROFIT** (“Take some money off”), and **↓ GET OUT** (“Leave if price hits here”), each paired with the exact mono plan price.
 - Optional bias, invalidation, reward:risk, and setup name are confined to a collapsed **Why** expander. Quality is always shown as Strong, Okay, or Skip when a plan is active.
-- Overlay dock craft follows Invertix §0c: void/ivory/Instrument Sans/mono, hairline `white/5`, sparse glass, and `--jx-cta #FF6A2C` on **Apply Jarvis plan** only. BUY ZONE stays cyan; GET OUT stays coral.
+- Overlay dock craft follows Invertix §0c on the full HUD surface: `--jx-void #050507`, `--jx-panel #0A0A0C`, hairline `white/8`, sparse glass blur 12–16px, editorial sans + mono prices, `--jx-cta #FF6A2C` on **Apply Jarvis plan** only. BUY ZONE stays cyan; GET OUT stays coral. This spike is overlay-only; companion screens are out of repo but share the same tokens.
 
 ## Files
 
@@ -65,7 +65,7 @@ There is no LLM-per-tick path or timer batching. Until the stream bridge lands, 
 - `adapters.js` — TradingView, Webull, Yahoo Finance, and Universal registry
 - `desk-plan.js` — testable exact-price and freshness contract validation
 - `content.js` — shared shadow-DOM dock, ESP, waypoints, modules, and layout
-- `docs/DESIGN.md` — locked Design SoT v0.2.7
+- `docs/DESIGN.md` — locked Design SoT v0.2.6
 - `docs/DESKPLAN.md` — canonical Risk/Algos-to-HUD rendering contract
 - `docs/DEMO.md` — multi-host screenshot and interaction checklist
 

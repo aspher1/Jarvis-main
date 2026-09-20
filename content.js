@@ -238,17 +238,22 @@
       :host {
         all: initial;
         color-scheme: dark;
-        --jx-void: #050505;
-        --jx-panel: #141414;
-        --jx-ivory: #F5EFE6;
-        --jx-ivory-muted: #EBDCB3;
-        --jx-hairline: rgba(255, 255, 255, 0.05);
-        --jx-glass: rgba(5, 5, 5, 0.64);
+        --jx-void: #050507;
+        --jx-panel: #0A0A0C;
+        --jx-text: #F2F2F4;
+        --jx-mute: #8B8B93;
+        --jx-ivory: var(--jx-text);
+        --jx-ivory-muted: var(--jx-mute);
+        --jx-hairline: rgba(255, 255, 255, 0.08);
+        --jx-glass: rgba(255, 255, 255, 0.04);
         --jx-cta: #FF6A2C;
+        --jx-system: #00D4AA;
         --jx-buy: #00D4AA;
         --jx-stop: #FF4757;
+        --jx-risk: #FF4757;
         --jx-active: #A6FF4D;
         --jx-warning: #FFB800;
+        --jx-warn: #FFB800;
         --jarvis-entry: var(--jx-buy);
         --jarvis-stop: var(--jx-stop);
         --jarvis-active: var(--jx-active);
@@ -344,8 +349,8 @@
         border: 1px solid var(--jx-hairline);
         border-left: 2px solid currentColor;
         font: 600 10px/1.25 var(--jx-sans);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
       }
 
       .waypoint-label strong { color: var(--waypoint-color); letter-spacing: .04em; }
@@ -365,11 +370,11 @@
         z-index: 799;
         width: 278px;
         color: var(--jx-ivory);
-        background: var(--jx-glass);
+        background: rgba(10, 10, 12, 0.82);
         border: 1px solid var(--jx-hairline);
         box-shadow: 0 12px 40px rgba(0, 0, 0, .28);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         pointer-events: auto;
       }
 
