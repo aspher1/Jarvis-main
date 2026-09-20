@@ -22,6 +22,9 @@ Chrome warns that the extension can read page content because the required Unive
 5. Press backtick to hide/restore Jarvis, then drag the chart through a label to confirm the chart still receives pointer input.
 6. Open an ordinary page with no recognized chart mount to verify the **Universal dock** appears without chart ESP.
 
+Preview stills (MOCK fixture, not live TV.com): [`docs/demo/tradingview_overlay.png`](docs/demo/tradingview_overlay.png) and [`docs/demo/universal_dock.png`](docs/demo/universal_dock.png). Replay via `python3 -m http.server` then `demo/tradingview.html` / `demo/universal.html`.
+
+
 ## HostAdapter registry
 
 `adapters.js` is the v1 registry. Host-specific configuration is limited to chart mount selectors, label contrast tokens, and the host badge.

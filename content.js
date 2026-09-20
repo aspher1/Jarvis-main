@@ -913,7 +913,7 @@
       analysisValue.textContent = "Live analysis on this chart (free)";
       planState.textContent = `MOCK · Quality: ${MOCK_DESK_PLAN.quality}`;
       delayedWarning.textContent =
-        "Mock dock only — chart ESP is off until an exact live stream arrives.";
+        "MOCK · demo prices. Chart labels are a visual fixture, not a live stream.";
       delayedWarning.classList.remove("is-hidden");
       whyPanel.open = whyWasOpen;
       renderWhy(MOCK_DESK_PLAN);
@@ -1103,9 +1103,9 @@
     dock.style.right = `${Math.min(rightGap, innerWidth - dockWidth - 8)}px`;
     dock.style.top = `${Math.min(desiredTop, availableTop)}px`;
 
-    const markerX = Math.max(
-      chartBounds.left + chartBounds.width * 0.68,
-      chartBounds.right - 205,
+    const markerX = Math.min(
+      chartBounds.left + chartBounds.width * 0.58,
+      chartBounds.right - dockWidth - 170,
     );
     const levels = currentLevels();
     const zone = shadow.querySelector(".entry-zone");

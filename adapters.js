@@ -70,6 +70,11 @@
   }
 
   function adapterForLocation(location) {
+    const demoHost =
+      globalThis.document?.documentElement?.getAttribute("data-jarvis-demo-host");
+    if (demoHost) {
+      return registry.find((adapter) => adapter.id === demoHost) || universal;
+    }
     return (
       registry.find((adapter) =>
         adapter.hostnames.some((hostname) =>
