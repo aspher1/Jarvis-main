@@ -45,48 +45,20 @@
       color: "#FF4757",
     },
   ];
-  const MOCK_DESK_PLAN = Object.freeze({
-    id: "DEMO-LocalDesk",
-    symbol: "DEMO",
-    source: "local-desk",
-    side: "BUY",
-    entry: 188.0375,
-    stop: 186.9125,
-    t1: 189.1625,
-    t2: 190.2875,
-    target1: 189.1625,
-    target2: 190.2875,
-    rMultiple: 1,
-    rewardRisk: 1,
-    invalidation: "Mock only — no live signal is connected.",
-    quality: "Okay",
-    levelsUsed: ["VWAP", "OR", "ATR"],
-    surface: {
-      buyZone: { label: "BUY ZONE", price: 188.0375, subtitle: "Buy here" },
-      takeProfit: {
-        label: "TAKE PROFIT",
-        price: 189.1625,
-        subtitle: "Take some money off",
-      },
-      getOut: {
-        label: "GET OUT",
-        price: 186.9125,
-        subtitle: "Leave if price hits here",
-      },
-    },
-    why: {
-      bias: "Mock LocalDesk fixture for layout review only.",
-      invalidation: "Mock only — no live signal is connected.",
-      r: 1,
-      setupName: "LocalDesk fixture",
-    },
-  });
   const MOCK_PROJECTION = Object.freeze({
-    entry: 0.56,
-    stop: 0.73,
-    t1: 0.39,
-    t2: 0.24,
+    entry: 0.5,
+    stop: 0.68,
+    t1: 0.34,
+    t2: 0.22,
   });
+  const LAST_PRICE_SELECTORS = [
+    ".js-symbol-last",
+    '[data-name="legend-source-item"]',
+    '[data-name="legend"]',
+    ".legend",
+    '[data-testid="qsp-price"]',
+    "fin-streamer[data-field='regularMarketPrice']",
+  ];
 
   const defaultPreferences = {
     esp: true,
@@ -107,6 +79,9 @@
   let lastSequence = -1;
   let refreshTimer;
   let lastUrl = location.href;
+
+  let lastMockAnchor;
+  let mockPlan;
 
   function loadPreferences() {
     try {
@@ -140,11 +115,101 @@
     }));
   }
 
-  function currentLevels() {
-    return activeEnvelope
-      ? levelsForPlan(activeEnvelope.plan, activeEnvelope.projection)
-      : levelsForPlan(MOCK_DESK_PLAN, MOCK_PROJECTION);
+  function extractPrices(text) {
+    return String(text || "")
+      .replace(/,/g, "")
+      .match(/\d+(?:\.\d+)?/g)
+      ?.map(Number)
+      .filter((value) => Number.isFinite(value) && value > 1 && value < 1e7) || [];
   }
+
+  function readVisibleLast(adapter) {
+    const lastSelectors = [
+      ...(adapter?.lastPriceSelectors || []),
+      ...LAST_PRICE_SELECTORS,
+    ];
+    for (const selector of lastSelectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        if (element.closest("#jarvis-multi-host-hud")) continue;
+        const prices = extractPrices(element.textContent);
+        if (prices.length) return prices[0];
+      }
+    }
+
+    const axisSelectors = adapter?.priceAxisSelectors || [];
+    const axisPrices = [];
+    for (const selector of axisSelectors) {
+      for (const element of document.querySelectorAll(selector)) {
+        if (element.closest("#jarvis-multi-host-hud")) continue;
+        axisPrices.push(...extractPrices(element.textContent));
+      }
+    }
+    if (axisPrices.length >= 2) {
+      return (Math.min(...axisPrices) + Math.max(...axisPrices)) / 2;
+    }
+    return undefined;
+  }
+
+  function buildMockPlan(last) {
+    const entry = last;
+    const stop = last * 0.992;
+    const t1 = last * 1.006;
+    const t2 = last * 1.012;
+    return {
+      id: "DEMO-LocalDesk",
+      symbol: "DEMO",
+      source: "local-desk",
+      side: "BUY",
+      entry,
+      stop,
+      t1,
+      t2,
+      target1: t1,
+      target2: t2,
+      rMultiple: 1,
+      rewardRisk: 1,
+      invalidation: "Mock only — no live signal is connected.",
+      quality: "Okay",
+      levelsUsed: ["VWAP", "OR", "ATR"],
+      surface: {
+        buyZone: { label: "BUY ZONE", price: entry, subtitle: "Buy here" },
+        takeProfit: {
+          label: "TAKE PROFIT",
+          price: t1,
+          subtitle: "Take some money off",
+        },
+        getOut: {
+          label: "GET OUT",
+          price: stop,
+          subtitle: "Leave if price hits here",
+        },
+      },
+      why: {
+        bias: "Mock LocalDesk fixture scaled to the visible last price.",
+        invalidation: "Mock only — no live signal is connected.",
+        r: 1,
+        setupName: "LocalDesk fixture",
+      },
+    };
+  }
+
+  function currentMockPlan(adapter) {
+    const last = readVisibleLast(adapter);
+    if (!Number.isFinite(last)) return mockPlan;
+    if (lastMockAnchor === last && mockPlan) return mockPlan;
+    lastMockAnchor = last;
+    mockPlan = buildMockPlan(last);
+    return mockPlan;
+  }
+
+  function currentLevels() {
+    if (activeEnvelope) {
+      return levelsForPlan(activeEnvelope.plan, activeEnvelope.projection);
+    }
+    const plan = currentMockPlan(activeAdapter);
+    return plan ? levelsForPlan(plan, MOCK_PROJECTION) : [];
+  }
+
 
   function setGapState(reason = "Waiting for an exact live DeskPlan") {
     activeEnvelope = undefined;
@@ -906,9 +971,12 @@
     };
 
     if (!activeEnvelope) {
+      const mock = currentMockPlan(activeAdapter);
       const gap = document.createElement("div");
       gap.className = "gap-state gap-copy";
-      gap.textContent = "MOCK plan · waiting for an exact live DeskPlan";
+      gap.textContent = mock
+        ? "MOCK plan · scaled to the visible last price"
+        : "MOCK plan · waiting for a visible last price";
       list.appendChild(gap);
       for (const level of currentLevels()) {
         appendListRow(level);
@@ -916,12 +984,12 @@
       }
       feedValue.textContent = "MOCK · demo prices";
       analysisValue.textContent = "Live analysis on this chart (free)";
-      planState.textContent = `MOCK · Quality: ${MOCK_DESK_PLAN.quality}`;
+      planState.textContent = `MOCK · Quality: ${mock?.quality || "Okay"}`;
       delayedWarning.textContent =
         "MOCK · demo prices. Chart labels are a visual fixture, not a live stream.";
       delayedWarning.classList.remove("is-hidden");
       whyPanel.open = whyWasOpen;
-      renderWhy(MOCK_DESK_PLAN);
+      if (mock) renderWhy(mock);
       return;
     }
 
@@ -931,7 +999,9 @@
       activeEnvelope.quote?.feed ?? activeEnvelope.feedStatus,
     ).toLowerCase();
     feedValue.textContent =
-      feedStatus === "delayed"
+      feedStatus === "mock" || feedStatus === "demo"
+        ? "MOCK · demo prices"
+        : feedStatus === "delayed"
         ? `Prices: Delayed · ~${activeEnvelope.delayMinutes}m`
         : `Prices: Live · ${lag}ms`;
     analysisValue.textContent = "Live analysis on this chart (free)";
@@ -1070,6 +1140,9 @@
     if (!shadow) return;
     if (
       activeEnvelope &&
+      !["mock", "demo"].includes(
+        String(activeEnvelope.quote?.feed ?? activeEnvelope.feedStatus).toLowerCase(),
+      ) &&
       Date.now() - activeEnvelope.observedAt >
         globalThis.JarvisDeskPlan.STALE_AFTER_MS
     ) {
@@ -1084,6 +1157,15 @@
       ? requestedAdapter
       : globalThis.JarvisHostAdapters.universal;
     if (resolvedAdapter !== activeAdapter) applyHostAdapter(resolvedAdapter);
+
+    if (!activeEnvelope) {
+      const previous = lastMockAnchor;
+      currentMockPlan(resolvedAdapter);
+      if (lastMockAnchor !== previous) {
+        renderPlan();
+        return;
+      }
+    }
 
     if (!chartBounds) {
       shadow.querySelector(".overlay").classList.add("is-hidden");
@@ -1115,6 +1197,10 @@
     const levels = currentLevels();
     const zone = shadow.querySelector(".entry-zone");
     const entry = levels.find((level) => level.id === "entry");
+    if (!entry || !Number.isFinite(entry.ratio)) {
+      shadow.querySelector(".overlay").classList.add("is-hidden");
+      return;
+    }
     const entryY =
       chartBounds.top + chartBounds.height * entry.ratio;
 

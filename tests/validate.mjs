@@ -165,4 +165,21 @@ assert.equal(design.includes("--jx-void"), true);
 assert.equal(content.includes("--jx-void: #050507"), true);
 assert.equal(content.includes("blur(16px)"), true);
 
+assert.equal(content.includes("188.0375"), false);
+assert.equal(content.includes("readVisibleLast"), true);
+
+const mockEnvelope = {
+  ...envelope,
+  source: "mock-demo",
+  feedStatus: "mock",
+  observedAt: now - 10_000,
+  sequence: 99,
+  plan: { ...envelope.plan, entry: 336.12, stop: 333.43104, t1: 338.13672, target1: 338.13672, t2: undefined },
+  projection: { entry: 0.5, stop: 0.68, t1: 0.34 },
+};
+assert.equal(
+  globalThis.JarvisDeskPlan.validateEnvelope(mockEnvelope, 41, now),
+  mockEnvelope,
+);
+
 console.log("Manifest, adapters, DeskPlan validation, Invertix craft, and gap safety pass");

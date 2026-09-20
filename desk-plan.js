@@ -27,12 +27,13 @@
     const invalidation = plan?.why?.invalidation ?? plan?.invalidation;
     if (
       value.type !== MESSAGE_TYPE ||
-      value.source !== "jarvis-free-local" ||
-      !["live", "delayed"].includes(feedStatus) ||
+      !["jarvis-free-local", "mock-demo"].includes(value.source) ||
+      !["live", "delayed", "mock", "demo"].includes(feedStatus) ||
       !Number.isSafeInteger(value.sequence) ||
       value.sequence <= lastSequence ||
       !Number.isFinite(value.observedAt) ||
-      Math.abs(now - value.observedAt) > STALE_AFTER_MS ||
+      (!["mock", "demo"].includes(feedStatus) &&
+        Math.abs(now - value.observedAt) > STALE_AFTER_MS) ||
       !plan ||
       !projection ||
       plan.source !== "local-desk" ||

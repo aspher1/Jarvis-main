@@ -72,6 +72,7 @@ The message example documents the live envelope shape. The extension does not em
 
 ## Mock fixture and axis-snap status
 
-Until PR #4’s LocalDesk producer is available to the extension runtime, `content.js` carries one schema-matching DeskPlan fixture for layout review. Its feed badge is always `MOCK · demo prices`; it is never called Live or Delayed. The fixture projection is visual-only and is not a Design PASS for exact host-axis placement.
+Until a live LocalDesk producer is wired, the HUD builds a MOCK DeskPlan from the **visible last price** (legend) or the mid of visible price-axis labels. It never uses a hardcoded 188-era fixture. The feed chip stays `MOCK · demo prices`.
+
 
 The integration step is to send LocalDesk’s unmodified `entry`, `stop`, `t1`, and optional `t2` together with host-axis projections from the same chart-scale revision. The HUD already snaps each line, beacon center, arrow row, and mono number to those projection coordinates without price re-rounding. Missing prices or projections reject the live envelope and preserve honest mock chrome.

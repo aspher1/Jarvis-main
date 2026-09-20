@@ -13,6 +13,17 @@
         "#chart-container",
         "canvas",
       ],
+      lastPriceSelectors: [
+        ".js-symbol-last",
+        '[data-name="legend-source-item"]',
+        '[data-name="legend"]',
+        ".legend",
+      ],
+      priceAxisSelectors: [
+        '[data-name="price-axis"]',
+        '[class*="priceAxis"]',
+        '[class*="price-axis"]',
+      ],
       contrast: {
         labelBackground: "rgba(5, 5, 5, 0.92)",
         labelBorder: "rgba(255, 255, 255, 0.18)",
@@ -28,6 +39,14 @@
         '[class*="kline"]',
         '[class*="chart"] canvas',
         "canvas",
+      ],
+      lastPriceSelectors: [
+        '[class*="last"]',
+        '[class*="price"]',
+      ],
+      priceAxisSelectors: [
+        '[class*="price-axis"]',
+        '[class*="yAxis"]',
       ],
       contrast: {
         labelBackground: "rgba(5, 5, 5, 0.94)",
@@ -46,6 +65,15 @@
         "#chart-container",
         'section[data-testid*="quote"] canvas',
         "canvas",
+      ],
+      lastPriceSelectors: [
+        '[data-testid="qsp-price"]',
+        '[data-field="regularMarketPrice"]',
+        "fin-streamer[data-field='regularMarketPrice']",
+      ],
+      priceAxisSelectors: [
+        '[class*="price-axis"]',
+        "fin-chart",
       ],
       contrast: {
         labelBackground: "rgba(5, 5, 5, 0.97)",

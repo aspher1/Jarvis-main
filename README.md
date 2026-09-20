@@ -56,6 +56,7 @@ There is no LLM-per-tick path or timer batching. Until the stream bridge lands, 
 - **Live analysis on this chart (free)** is the default analysis badge; this spike has no cloud dependency.
 - The optional Jarvis Chat toggle is off by default and identified as **AI helper (paid · limited uses)**. This spike does not connect to a paid service.
 - On-chart labels lead with kid-clear actions: **→ BUY ZONE** (“Buy here”), **↑ TAKE PROFIT** (“Take some money off”), and **↓ GET OUT** (“Leave if price hits here”), each paired with the exact mono plan price.
+- MOCK DeskPlan prices are derived from the host chart’s visible last (legend) or price-axis mid — never a hardcoded 188-era fixture — then placed on-chart. The feed chip stays **MOCK · demo prices**.
 - Optional bias, invalidation, reward:risk, and setup name are confined to a collapsed **Why** expander. Quality is always shown as Strong, Okay, or Skip when a plan is active.
 - Overlay dock craft follows Invertix §0c on the full HUD surface: `--jx-void #050507`, `--jx-panel #0A0A0C`, hairline `white/8`, sparse glass blur 12–16px, editorial sans + mono prices, `--jx-cta #FF6A2C` on **Apply Jarvis plan** only. BUY ZONE stays cyan; GET OUT stays coral. This spike is overlay-only; companion screens are out of repo but share the same tokens.
 
