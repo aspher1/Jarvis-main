@@ -1,6 +1,8 @@
 <!-- portfolio-intro:start -->
 # Jarvis | Multi-Host Chart HUD Prototype
 
+[![CI status](https://github.com/aspher1/Jarvis-main/actions/workflows/ci.yml/badge.svg)](https://github.com/aspher1/Jarvis-main/actions/workflows/ci.yml)
+
 **A lightweight Chrome extension prototype for overlaying trading-plan waypoints on financial charts.** The work focuses on consistent interaction patterns across sites, clear paper-data labeling and predictable fallback behavior.
 
 **Tech:** JavaScript, Chrome Manifest V3, content scripts, Shadow DOM, Node-based validation.
