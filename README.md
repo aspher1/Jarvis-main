@@ -21,7 +21,7 @@
 
 <!-- portfolio-intro:end -->
 
-# Jarvis Multi-Host HUD Spike
+## Extension setup and data contract
 
 A dependency-free Chrome Manifest V3 extension that renders a canonical live `DeskPlan` on supported chart hosts. It does not read credentials, broker cookies, positions, or orders, and it never generates or rounds level prices.
 
