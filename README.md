@@ -1,3 +1,24 @@
+<!-- portfolio-intro:start -->
+# Jarvis | Multi-Host Chart HUD Prototype
+
+**A lightweight Chrome extension prototype for overlaying trading-plan waypoints on financial charts.** The work focuses on consistent interaction patterns across sites, clear paper-data labeling and predictable fallback behavior.
+
+**Tech:** JavaScript, Chrome Manifest V3, content scripts, Shadow DOM, Node-based validation.
+
+**Engineering highlights**
+- Host adapters for TradingView, Webull, Yahoo Finance and a universal fallback.
+- Plan-value validation and freshness checks without silently inventing prices.
+- Pointer-safe chart overlays, keyboard controls and collapsible guidance.
+- Explicit mock-data and paper-mode warnings.
+
+**Explore:** [Host adapters](adapters.js) · [Plan validation](desk-plan.js) · [Design notes](docs/DESIGN.md) · [Tests](tests/)
+
+**Current scope:** This is **not** a live market-data service or broker integration. The demo uses labeled mock values. The `<all_urls>` content-script permission warrants careful security and store-review consideration before distribution.
+
+---
+
+<!-- portfolio-intro:end -->
+
 # Jarvis Multi-Host HUD Spike
 
 A dependency-free Chrome Manifest V3 extension that renders a canonical live `DeskPlan` on supported chart hosts. It does not read credentials, broker cookies, positions, or orders, and it never generates or rounds level prices.
